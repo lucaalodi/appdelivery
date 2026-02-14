@@ -235,6 +235,28 @@ class Cart extends ChangeNotifier {
     notifyListeners();
   }
 
+  void removeSingleItem(String menuItemId) {
+    try {
+      final item = _items.keys.firstWhere(
+        (element) => element.id == menuItemId,
+      );
+
+      if (_items[item]! > 1) {
+        _items[item] = _items[item]! - 1;
+      } else {
+        _items.remove(item);
+      }
+
+      if (_items.isEmpty) {
+        selectedRestaurant = null;
+      }
+
+      notifyListeners();
+    } catch (e) {
+      // item não encontrado, não faz nada
+    }
+  }
+
   void clear() {
     _items.clear();
     selectedRestaurant = null;

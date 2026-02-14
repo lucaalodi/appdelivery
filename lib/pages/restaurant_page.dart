@@ -16,7 +16,7 @@ class RestaurantPage extends StatefulWidget {
 }
 
 class _RestaurantPageState extends State<RestaurantPage> {
-  String? selectedCategory;
+  String selectedCategory = 'Todos';
 
   @override
   void initState() {
@@ -54,12 +54,8 @@ class _RestaurantPageState extends State<RestaurantPage> {
 
     final categories = [
       'Todos',
-      ...visibleMenu.map((item) => item.category).toSet().toList(),
+      ...visibleMenu.map((item) => item.category).toSet(),
     ];
-
-    if (selectedCategory == null && categories.isNotEmpty) {
-      selectedCategory = 'Todos';
-    }
 
     return Scaffold(
       body: visibleMenu.isEmpty
@@ -189,7 +185,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
                 const SizedBox(height: 16),
 
                 // ================= TABS =================
-                if (categories.isNotEmpty)
+                if (categories.length > 1)
                   SizedBox(
                     height: 45,
                     child: ListView.builder(
@@ -231,116 +227,148 @@ class _RestaurantPageState extends State<RestaurantPage> {
 
                 const SizedBox(height: 12),
 
-                // ================= MENU FILTRADO =================
+                // ================= MENU =================
                 Padding(
                   padding: const EdgeInsets.all(10),
                   child: Column(
-                    children: visibleMenu
-                        .where(
-                          (item) => selectedCategory == 'Todos'
-                              ? true
-                              : item.category == selectedCategory,
-                        )
-                        .map((item) {
-                          return Card(
-                            elevation: 2,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            margin: const EdgeInsets.only(bottom: 12),
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(12),
-                              onTap: () {
-                                if (item.category.toLowerCase().contains(
-                                  'pizza',
-                                )) {
-                                  _openPizzaBuilder(context, item);
-                                } else {
-                                  final ok = cart.addItem(item, restaurant);
+                    children: selectedCategory == 'Todos'
+                        ? visibleMenu.map((item) => item.category).toSet().map((
+                            category,
+                          ) {
+                            final items = visibleMenu
+                                .where((i) => i.category == category)
+                                .toList();
 
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        ok
-                                            ? 'Adicionado ao carrinho'
-                                            : 'Você só pode pedir de um restaurante por vez.',
-                                      ),
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 8,
+                                  ),
+                                  child: Text(
+                                    category,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
                                     ),
-                                  );
-                                }
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.all(10),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      width: 60,
-                                      height: 60,
-                                      decoration: BoxDecoration(
-                                        color: Colors.grey.shade100,
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      child: item.imageUrl.isNotEmpty
-                                          ? ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(10),
-                                              child: Image.network(
-                                                item.imageUrl,
-                                                fit: BoxFit.cover,
-                                              ),
-                                            )
-                                          : const Icon(
-                                              Icons.fastfood,
-                                              size: 34,
-                                            ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            item.name,
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          if (item.description.isNotEmpty)
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                top: 4,
-                                              ),
-                                              child: Text(
-                                                item.description,
-                                                style: TextStyle(
-                                                  color: Colors.grey.shade600,
-                                                  fontSize: 12,
-                                                ),
-                                              ),
-                                            ),
-                                          const SizedBox(height: 6),
-                                          Text(
-                                            'R\$ ${item.price.toStringAsFixed(2)}',
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    const Icon(Icons.add_circle),
-                                  ],
+                                  ),
                                 ),
-                              ),
-                            ),
-                          );
-                        })
-                        .toList(),
+                                ...items.map(
+                                  (item) =>
+                                      _buildMenuCard(item, cart, restaurant),
+                                ),
+                              ],
+                            );
+                          }).toList()
+                        : visibleMenu
+                              .where(
+                                (item) => item.category == selectedCategory,
+                              )
+                              .map(
+                                (item) =>
+                                    _buildMenuCard(item, cart, restaurant),
+                              )
+                              .toList(),
                   ),
                 ),
               ],
             ),
+    );
+  }
+
+  Widget _buildMenuCard(MenuItem item, Cart cart, Restaurant restaurant) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      margin: const EdgeInsets.only(bottom: 12),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () {
+          if (item.category.toLowerCase().contains('pizza')) {
+            _openPizzaBuilder(context, item);
+          } else {
+            final ok = cart.addItem(item, restaurant);
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  ok
+                      ? 'Adicionado ao carrinho'
+                      : 'Você só pode pedir de um restaurante por vez.',
+                ),
+              ),
+            );
+          }
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Row(
+            children: [
+              Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: item.imageUrl.isNotEmpty
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Image.network(item.imageUrl, fit: BoxFit.cover),
+                      )
+                    : const Icon(Icons.fastfood, size: 34),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.name,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    if (item.description.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          item.description,
+                          style: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'R\$ ${item.price.toStringAsFixed(2)}',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Text(
+                  'Adicionar',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
