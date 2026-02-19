@@ -19,6 +19,7 @@ class _HomePageState extends State<HomePage> {
 
   String? selectedCategory;
   String searchText = '';
+  final String _adminPassword = "912708"; // altere para sua senha
 
   final categories = const [
     {'icon': '🍔', 'name': 'Hamburguer'},
@@ -26,18 +27,58 @@ class _HomePageState extends State<HomePage> {
     {'icon': '🍟', 'name': 'Porções'},
     {'icon': '🥟', 'name': 'Pastel'},
     {'icon': '🌭', 'name': 'Lanches'},
-    {'icon': '🥐', 'name': 'Padaria'},
+    {'icon': '🥡', 'name': 'Combos'},
   ];
 
   void _handleSecretTap() {
     _tapCount++;
+
     if (_tapCount == 5) {
       _tapCount = 0;
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => const AdminPage()),
-      );
+      _showPasswordDialog();
     }
+  }
+
+  void _showPasswordDialog() {
+    final controller = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text("Acesso Admin"),
+        content: TextField(
+          controller: controller,
+          obscureText: true,
+          autofocus: true,
+          decoration: const InputDecoration(hintText: "Digite a senha"),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancelar"),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (controller.text == _adminPassword) {
+                Navigator.pop(context);
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const AdminPage()),
+                );
+              } else {
+                Navigator.pop(context);
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Senha incorreta")),
+                );
+              }
+            },
+            child: const Text("Entrar"),
+          ),
+        ],
+      ),
+    );
   }
 
   List<Widget> _pages(BuildContext context) {

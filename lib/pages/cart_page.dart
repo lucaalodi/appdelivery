@@ -567,11 +567,21 @@ class _CartPageState extends State<CartPage> {
 
   // ================== FINISH ==================
 
-  void finishOrder(Cart cart) async {
+  Future<void> finishOrder(Cart cart) async {
+    // ===== VALIDA ENDEREÇO (somente se for entrega) =====
+
+    if (!cart.isPickup && _addressController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Informe o endereço para entrega"),
+          backgroundColor: Colors.red,
+        ),
+      );
+
+      return;
+    }
+
     final restaurant = cart.selectedRestaurant!;
-    restaurant.ordersCount++;
-    restaurant.totalRevenue += cart.totalWithDelivery;
-    cart.updateRestaurant(restaurant);
 
     final message = cart.generateOrderMessage(
       customerName: _nameController.text.isEmpty
@@ -583,20 +593,69 @@ class _CartPageState extends State<CartPage> {
       change: _changeController.text,
     );
 
+    // ===== CONFIRMAÇÃO =====
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Confirmar pedido"),
+          content: const Text(
+            'Seu pedido será enviado para o WhatsApp do restaurante.\n\n'
+            'Na próxima tela, toque em "Enviar" para finalizar.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, false);
+              },
+              child: const Text("Cancelar"),
+            ),
+
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFE77427),
+              ),
+              onPressed: () {
+                Navigator.pop(context, true);
+              },
+              child: const Text("Enviar pedido"),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true) return;
+
+    // ===== ATUALIZA ESTATÍSTICAS =====
+
+    restaurant.ordersCount++;
+    restaurant.totalRevenue += cart.totalWithDelivery;
+
+    cart.updateRestaurant(restaurant);
+
+    // ===== ENVIA PARA WHATSAPP =====
+
     await sendOrderToWhatsApp(
       context: context,
       phone: restaurant.phone,
       message: message,
     );
-  }
 
-  @override
-  void dispose() {
-    _pageController.dispose();
-    _nameController.dispose();
-    _addressController.dispose();
-    _notesController.dispose();
-    _changeController.dispose();
-    super.dispose();
+    // ===== LIMPA CARRINHO =====
+
+    cart.clear();
+
+    // ===== LIMPA CAMPOS =====
+
+    _nameController.clear();
+    _addressController.clear();
+    _notesController.clear();
+    _changeController.clear();
+
+    // ===== VOLTA PARA PRIMEIRA TELA =====
+
+    _pageController.jumpToPage(0);
   }
 }

@@ -396,7 +396,7 @@ class Cart extends ChangeNotifier {
     buffer.writeln('⚠️ Confirmação do Restaurante');
     buffer.writeln('✅ CONFIRMADO ou ❌ RECUSADO');
     buffer.writeln('────────────────────────');
-    buffer.writeln('📲 Enviado pelo app *Delivery da Cidade*');
+    buffer.writeln('📲 Enviado pelo app *1Rango*');
 
     return buffer.toString();
   }
