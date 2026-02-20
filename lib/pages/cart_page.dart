@@ -568,7 +568,17 @@ class _CartPageState extends State<CartPage> {
   // ================== FINISH ==================
 
   Future<void> finishOrder(Cart cart) async {
-    // ===== VALIDA ENDEREÇO (somente se for entrega) =====
+    // ===== VALIDA ENDEREÇO E NOME =====
+
+    if (_nameController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Informe seu nome"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
 
     if (!cart.isPickup && _addressController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(

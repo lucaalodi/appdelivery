@@ -22,12 +22,13 @@ class _HomePageState extends State<HomePage> {
   final String _adminPassword = "912708"; // altere para sua senha
 
   final categories = const [
-    {'icon': '🍔', 'name': 'Hamburguer'},
-    {'icon': '🍕', 'name': 'Pizza'},
-    {'icon': '🍟', 'name': 'Porções'},
-    {'icon': '🥟', 'name': 'Pastel'},
-    {'icon': '🌭', 'name': 'Lanches'},
-    {'icon': '🥡', 'name': 'Combos'},
+    {'image': 'assets/categories/hamburguer.png', 'name': 'Hamburguer'},
+    {'image': 'assets/categories/pizza.png', 'name': 'Pizza'},
+    {'image': 'assets/categories/lanches.png', 'name': 'Lanches'},
+    {'image': 'assets/categories/porcoes.png', 'name': 'Porções'},
+    {'image': 'assets/categories/pastel.png', 'name': 'Pastel'},
+    {'image': 'assets/categories/combos.png', 'name': 'Combos'},
+    {'image': 'assets/categories/bebidas.png', 'name': 'Bebidas'},
   ];
 
   void _handleSecretTap() {
@@ -203,47 +204,74 @@ class _HomePageState extends State<HomePage> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Column(
                     children: [
-                      // ================= CATEGORIAS =================
-                      Container(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: const [
-                            BoxShadow(color: Colors.black12, blurRadius: 4),
-                          ],
-                        ),
-                        child: SizedBox(
-                          height: 85,
-                          child: ListView.separated(
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            scrollDirection: Axis.horizontal,
-                            itemCount: categories.length,
-                            separatorBuilder: (_, __) =>
-                                const SizedBox(width: 12),
-                            itemBuilder: (context, index) {
-                              final cat = categories[index];
-                              final isSelected =
-                                  selectedCategory == cat['name'];
+                      // ================= CATEGORIAS ESTILO IFOOD =================
+                      SizedBox(
+                        height: 110,
+                        child: ListView.builder(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          scrollDirection: Axis.horizontal,
+                          itemCount: categories.length,
+                          itemBuilder: (context, index) {
+                            final cat = categories[index];
+                            final isSelected = selectedCategory == cat['name'];
 
-                              return InkWell(
-                                borderRadius: BorderRadius.circular(40),
-                                onTap: () {
-                                  setState(() {
-                                    selectedCategory = isSelected
-                                        ? null
-                                        : cat['name'];
-                                  });
-                                },
+                            return GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  selectedCategory = isSelected
+                                      ? null
+                                      : cat['name'] as String;
+                                });
+                              },
+                              child: Container(
+                                width: 90,
+                                margin: const EdgeInsets.only(right: 12),
                                 child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     AnimatedContainer(
                                       duration: const Duration(
-                                        milliseconds: 200,
+                                        milliseconds: 180,
                                       ),
-                                      padding: const EdgeInsets.all(12),
+                                      height: 70,
+                                      width: 90,
                                       decoration: BoxDecoration(
+                                        color: isSelected
+                                            ? const Color.fromARGB(
+                                                255,
+                                                255,
+                                                237,
+                                                224,
+                                              )
+                                            : Colors.grey.shade200,
+                                        borderRadius: BorderRadius.circular(18),
+                                        border: isSelected
+                                            ? Border.all(
+                                                color: const Color.fromARGB(
+                                                  255,
+                                                  231,
+                                                  116,
+                                                  39,
+                                                ),
+                                                width: 1.5,
+                                              )
+                                            : null,
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(10),
+                                        child: Image.asset(
+                                          cat['image'] as String,
+                                          fit: BoxFit.contain,
+                                        ),
+                                      ),
+                                    ),
+
+                                    const SizedBox(height: 6),
+
+                                    Text(
+                                      cat['name'] as String,
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w500,
                                         color: isSelected
                                             ? const Color.fromARGB(
                                                 255,
@@ -251,34 +279,16 @@ class _HomePageState extends State<HomePage> {
                                                 116,
                                                 39,
                                               )
-                                            : Colors.grey.shade100,
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: Text(
-                                        cat['icon']!,
-                                        style: const TextStyle(fontSize: 22),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 6),
-                                    Text(
-                                      cat['name']!,
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: isSelected
-                                            ? FontWeight.bold
-                                            : FontWeight.normal,
+                                            : Colors.black87,
                                       ),
                                     ),
                                   ],
                                 ),
-                              );
-                            },
-                          ),
+                              ),
+                            );
+                          },
                         ),
                       ),
-
-                      const SizedBox(height: 24),
-
                       // ================= ABERTOS =================
                       if (openRestaurants.isNotEmpty) ...[
                         const Align(
