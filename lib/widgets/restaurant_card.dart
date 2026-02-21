@@ -9,23 +9,15 @@ class RestaurantCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 6,
-            offset: const Offset(0, 3),
-          ),
-        ],
+      padding: const EdgeInsets.symmetric(
+        vertical: 8, // 🔥 antes era 14
+        horizontal: 4,
       ),
       child: Row(
         children: [
-          // ✅ LOGO
+          // LOGO
           Container(
-            width: 56,
+            width: 56, // 🔥 antes 56
             height: 56,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
@@ -37,49 +29,56 @@ class RestaurantCard extends StatelessWidget {
                   ? Image.network(
                       restaurant.logoUrl,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) {
-                        return const Icon(Icons.store, size: 32);
-                      },
+                      errorBuilder: (_, __, ___) =>
+                          const Icon(Icons.store, size: 26),
                     )
-                  : const Icon(Icons.store, size: 32),
+                  : const Icon(Icons.store, size: 26),
             ),
           ),
-          const SizedBox(width: 14),
 
-          // ✅ INFOS
+          const SizedBox(width: 10), // 🔥 antes 14
+          // INFOS
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min, // 🔥 importante
               children: [
                 Text(
                   restaurant.name,
                   style: const TextStyle(
-                    fontSize: 16,
+                    fontSize: 15, // 🔥 antes 16
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 4),
+
+                const SizedBox(height: 2), // 🔥 antes 4
+
                 Text(
                   restaurant.description,
-                  maxLines: 2,
+                  maxLines: 1, // 🔥 antes 2
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                  style: TextStyle(
+                    color: Colors.grey.shade600,
+                    fontSize: 12, // 🔥 antes 13
+                  ),
                 ),
-                const SizedBox(height: 6),
+
+                const SizedBox(height: 3), // 🔥 antes 6
+
                 Row(
                   children: [
                     Icon(
                       Icons.delivery_dining,
-                      size: 16,
+                      size: 14, // 🔥 antes 16
                       color: Colors.grey.shade600,
                     ),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: 3),
                     Text(
                       restaurant.deliveryFee == 0
                           ? 'Entrega grátis'
                           : 'Taxa R\$ ${restaurant.deliveryFee.toStringAsFixed(2)}',
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: 11, // 🔥 antes 12
                         color: Colors.grey.shade700,
                       ),
                     ),
@@ -89,9 +88,12 @@ class RestaurantCard extends StatelessWidget {
             ),
           ),
 
-          // ✅ STATUS
+          // STATUS (menor)
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 7, // 🔥 antes 8
+              vertical: 3, // 🔥 antes 4
+            ),
             decoration: BoxDecoration(
               color: restaurant.isOpen ? Colors.green : Colors.red,
               borderRadius: BorderRadius.circular(6),
@@ -100,7 +102,7 @@ class RestaurantCard extends StatelessWidget {
               restaurant.isOpen ? 'Aberto' : 'Fechado',
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 11,
+                fontSize: 10, // 🔥 antes 11
                 fontWeight: FontWeight.bold,
               ),
             ),

@@ -24,7 +24,7 @@ class _HomePageState extends State<HomePage> {
   final categories = const [
     {'image': 'assets/categories/hamburguer.png', 'name': 'Hamburguer'},
     {'image': 'assets/categories/pizza.png', 'name': 'Pizza'},
-    {'image': 'assets/categories/lanches.png', 'name': 'Lanches'},
+    {'image': 'assets/categories/hot-dog.png', 'name': 'Hot-Dog'},
     {'image': 'assets/categories/porcoes.png', 'name': 'Porções'},
     {'image': 'assets/categories/pastel.png', 'name': 'Pastel'},
     {'image': 'assets/categories/combos.png', 'name': 'Combos'},
@@ -86,17 +86,29 @@ class _HomePageState extends State<HomePage> {
     return [_buildHome(context), const CartPage()];
   }
 
+  // Footer
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: Colors.white,
       body: SafeArea(child: _pages(context)[_currentIndex]),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.white,
         selectedItemColor: const Color.fromARGB(255, 187, 88, 31),
         unselectedItemColor: Colors.grey,
+
         currentIndex: _currentIndex,
         onTap: (i) => setState(() => _currentIndex = i),
+
+        type: BottomNavigationBarType.fixed,
+
+        iconSize: 24, // 🔥 menor
+        selectedFontSize: 11, // 🔥 menor
+        unselectedFontSize: 10, // 🔥 menor
+
+        selectedLabelStyle: const TextStyle(height: 1),
+        unselectedLabelStyle: const TextStyle(height: 1),
+
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Início'),
           BottomNavigationBarItem(
@@ -204,11 +216,11 @@ class _HomePageState extends State<HomePage> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Column(
                     children: [
-                      // ================= CATEGORIAS ESTILO IFOOD =================
+                      // ================= CATEGORIAS ESTILO IFOOD (IMAGEM 3D AJUSTADA) =================
                       SizedBox(
-                        height: 110,
+                        height: 105, // 🔥 antes 130
                         child: ListView.builder(
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
                           scrollDirection: Axis.horizontal,
                           itemCount: categories.length,
                           itemBuilder: (context, index) {
@@ -224,16 +236,19 @@ class _HomePageState extends State<HomePage> {
                                 });
                               },
                               child: Container(
-                                width: 90,
-                                margin: const EdgeInsets.only(right: 12),
+                                width: 78, // 🔥 antes 95
+                                margin: const EdgeInsets.only(
+                                  right: 10,
+                                ), // 🔥 antes 12
                                 child: Column(
+                                  mainAxisSize: MainAxisSize.min,
                                   children: [
                                     AnimatedContainer(
                                       duration: const Duration(
                                         milliseconds: 180,
                                       ),
-                                      height: 70,
-                                      width: 90,
+                                      height: 64, // 🔥 antes 85
+                                      width: 78,
                                       decoration: BoxDecoration(
                                         color: isSelected
                                             ? const Color.fromARGB(
@@ -243,7 +258,9 @@ class _HomePageState extends State<HomePage> {
                                                 224,
                                               )
                                             : Colors.grey.shade200,
-                                        borderRadius: BorderRadius.circular(18),
+                                        borderRadius: BorderRadius.circular(
+                                          16,
+                                        ), // 🔥 antes 20
                                         border: isSelected
                                             ? Border.all(
                                                 color: const Color.fromARGB(
@@ -252,12 +269,14 @@ class _HomePageState extends State<HomePage> {
                                                   116,
                                                   39,
                                                 ),
-                                                width: 1.5,
+                                                width: 1.3,
                                               )
                                             : null,
                                       ),
                                       child: Padding(
-                                        padding: const EdgeInsets.all(10),
+                                        padding: const EdgeInsets.all(
+                                          6,
+                                        ), // 🔥 melhor proporção
                                         child: Image.asset(
                                           cat['image'] as String,
                                           fit: BoxFit.contain,
@@ -265,12 +284,15 @@ class _HomePageState extends State<HomePage> {
                                       ),
                                     ),
 
-                                    const SizedBox(height: 6),
+                                    const SizedBox(height: 5), // 🔥 antes 8
 
                                     Text(
                                       cat['name'] as String,
+                                      textAlign: TextAlign.center,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
-                                        fontSize: 13,
+                                        fontSize: 12, // 🔥 antes 13
                                         fontWeight: FontWeight.w500,
                                         color: isSelected
                                             ? const Color.fromARGB(
@@ -296,30 +318,36 @@ class _HomePageState extends State<HomePage> {
                           child: Text(
                             'Abertos agora',
                             style: TextStyle(
-                              fontSize: 20,
+                              fontSize: 16,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
-                        const SizedBox(height: 14),
+                        const SizedBox(height: 10),
                         ...openRestaurants.map((restaurant) {
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(12),
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) =>
-                                        RestaurantPage(restaurant: restaurant),
-                                  ),
-                                );
-                              },
-                              child: RestaurantCard(restaurant: restaurant),
-                            ),
+                          return Column(
+                            children: [
+                              InkWell(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => RestaurantPage(
+                                        restaurant: restaurant,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: RestaurantCard(restaurant: restaurant),
+                              ),
+                              Divider(
+                                height: 1,
+                                thickness: 1,
+                                color: Colors.grey.withOpacity(0.15),
+                              ),
+                            ],
                           );
-                        }),
+                        }).toList(),
                       ],
 
                       // ================= FECHADOS =================
@@ -330,12 +358,12 @@ class _HomePageState extends State<HomePage> {
                           child: Text(
                             'Fechados',
                             style: TextStyle(
-                              fontSize: 18,
+                              fontSize: 14,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
-                        const SizedBox(height: 14),
+                        const SizedBox(height: 12),
                         ...closedRestaurants.map((restaurant) {
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 12),
