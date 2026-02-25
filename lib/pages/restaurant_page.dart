@@ -259,7 +259,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
                   right: 0,
                   child: SafeArea(
                     child: Padding(
-                      padding: const EdgeInsets.all(10),
+                      padding: const EdgeInsets.all(6), // antes era 10
                       child: GestureDetector(
                         onTap: () {
                           Navigator.push(
@@ -268,31 +268,36 @@ class _RestaurantPageState extends State<RestaurantPage> {
                           );
                         },
                         child: Container(
-                          height: 56,
+                          height: 44, // antes era 56
                           decoration: BoxDecoration(
                             color: const Color(0xFFE77427),
-                            borderRadius: BorderRadius.circular(14),
+                            borderRadius: BorderRadius.circular(10), // antes 14
                           ),
                           child: Row(
                             children: [
-                              const SizedBox(width: 16),
+                              const SizedBox(width: 12), // antes 16
+
                               const Expanded(
                                 child: Text(
                                   "Ver minha sacola",
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 16,
+                                    fontSize: 14, // antes 16
                                   ),
                                 ),
                               ),
+
                               Padding(
-                                padding: const EdgeInsets.only(right: 16),
+                                padding: const EdgeInsets.only(
+                                  right: 12,
+                                ), // antes 16
                                 child: Text(
                                   "R\$ ${cart.totalWithDelivery.toStringAsFixed(2)}",
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
+                                    fontSize: 14, // adicionado menor
                                   ),
                                 ),
                               ),
@@ -360,8 +365,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
                 ),
               ),
 
-              GestureDetector(
-                behavior: HitTestBehavior.opaque,
+              AddButton(
                 onTap: () {
                   if (item.category.toLowerCase().contains('pizza')) {
                     _openPizzaBuilder(context, item);
@@ -379,24 +383,6 @@ class _RestaurantPageState extends State<RestaurantPage> {
                     }
                   }
                 },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Text(
-                    'Adicionar',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
               ),
             ],
           ),
@@ -423,5 +409,69 @@ class _RestaurantPageState extends State<RestaurantPage> {
             PizzaBuilderPage(pizzaBase: item, maxFlavors: maxFlavors),
       ),
     );
+  }
+}
+
+class AddButton extends StatefulWidget {
+  final VoidCallback onTap;
+
+  const AddButton({super.key, required this.onTap});
+
+  @override
+  State<AddButton> createState() => _AddButtonState();
+}
+
+class _AddButtonState extends State<AddButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController controller;
+
+  @override
+  void initState() {
+    super.initState();
+
+    controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 120),
+      lowerBound: 0.92,
+      upperBound: 1.0,
+      value: 1.0,
+    );
+  }
+
+  Future<void> animate() async {
+    await controller.reverse();
+    await controller.forward();
+    widget.onTap();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ScaleTransition(
+      scale: controller,
+      child: GestureDetector(
+        onTap: animate,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: Theme.of(context).primaryColor,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: const Text(
+            'Adicionar',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
   }
 }

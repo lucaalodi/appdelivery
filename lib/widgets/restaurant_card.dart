@@ -9,15 +9,12 @@ class RestaurantCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        vertical: 8, // 🔥 antes era 14
-        horizontal: 4,
-      ),
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
       child: Row(
         children: [
           // LOGO
           Container(
-            width: 56, // 🔥 antes 56
+            width: 56,
             height: 56,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),

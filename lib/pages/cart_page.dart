@@ -120,13 +120,13 @@ class _CartPageState extends State<CartPage> {
 
   Widget stepCart(Cart cart) {
     return Padding(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
             'Seu pedido',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
 
@@ -137,8 +137,8 @@ class _CartPageState extends State<CartPage> {
                 final qty = e.value;
 
                 return Container(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  padding: const EdgeInsets.all(12),
+                  margin: const EdgeInsets.only(bottom: 10),
+                  padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(14),
@@ -156,14 +156,17 @@ class _CartPageState extends State<CartPage> {
                             Text(
                               item.name,
                               style: const TextStyle(
-                                fontSize: 16,
+                                fontSize: 14,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                             const SizedBox(height: 6),
                             Text(
                               'R\$ ${item.price.toStringAsFixed(2)}',
-                              style: TextStyle(color: Colors.grey.shade600),
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.grey.shade600,
+                              ),
                             ),
                           ],
                         ),
@@ -186,7 +189,7 @@ class _CartPageState extends State<CartPage> {
                             Text(
                               qty.toString(),
                               style: const TextStyle(
-                                fontSize: 16,
+                                fontSize: 14,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -210,19 +213,19 @@ class _CartPageState extends State<CartPage> {
 
           // TOTAL
           Container(
-            padding: const EdgeInsets.all(14),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.secondary,
               borderRadius: BorderRadius.circular(14),
             ),
             child: Row(
               children: [
-                const Text('Subtotal', style: TextStyle(fontSize: 16)),
+                const Text('Subtotal', style: TextStyle(fontSize: 14)),
                 const Spacer(),
                 Text(
                   'R\$ ${cart.totalAmount.toStringAsFixed(2)}',
                   style: const TextStyle(
-                    fontSize: 20,
+                    fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -238,12 +241,12 @@ class _CartPageState extends State<CartPage> {
 
   Widget stepData(Cart cart) {
     return Padding(
-      padding: const EdgeInsets.all(12), // antes 16
+      padding: const EdgeInsets.all(10),
       child: ListView(
         children: [
           // ===== CLIENTE =====
           Container(
-            padding: const EdgeInsets.all(10), // antes 14
+            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(14),
@@ -260,13 +263,13 @@ class _CartPageState extends State<CartPage> {
                     Text(
                       'Dados do cliente',
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 14,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 6),
                 TextField(
                   controller: _nameController,
                   decoration: const InputDecoration(
@@ -278,7 +281,7 @@ class _CartPageState extends State<CartPage> {
             ),
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
 
           // ===== ENTREGA =====
           Container(
@@ -296,11 +299,11 @@ class _CartPageState extends State<CartPage> {
                 const Row(
                   children: [
                     Icon(Icons.local_shipping),
-                    SizedBox(width: 8),
+                    SizedBox(width: 6),
                     Text(
                       'Entrega',
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 14,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -330,12 +333,64 @@ class _CartPageState extends State<CartPage> {
                     ),
                   ),
                   const SizedBox(height: 6),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: TextButton.icon(
+                  const SizedBox(height: 8),
+
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Divider(
+                          thickness: 1,
+                          color: Colors.grey.shade300,
+                        ),
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 8),
+                        child: Text(
+                          'OU',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Divider(
+                          thickness: 1,
+                          color: Colors.grey.shade300,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  Center(
+                    child: ElevatedButton.icon(
                       onPressed: getLocation,
-                      icon: const Icon(Icons.my_location),
-                      label: const Text('Usar minha localização'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.grey.shade100,
+                        foregroundColor: Colors.black87,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        minimumSize: const Size(0, 36),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          side: BorderSide(color: Colors.grey.shade300),
+                        ),
+                      ),
+                      icon: const Icon(Icons.my_location, size: 18),
+                      label: const Text(
+                        'Usar minha localização',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -347,7 +402,7 @@ class _CartPageState extends State<CartPage> {
 
           // ===== OBS =====
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(14),
@@ -364,13 +419,13 @@ class _CartPageState extends State<CartPage> {
                     Text(
                       'Observações',
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 14,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 TextField(
                   controller: _notesController,
                   maxLines: 4,
@@ -402,8 +457,9 @@ class _CartPageState extends State<CartPage> {
         onTap: () => setState(() => paymentMethod = title),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          margin: const EdgeInsets.only(bottom: 12),
-          padding: const EdgeInsets.all(14),
+          constraints: const BoxConstraints(minHeight: 34),
+          margin: const EdgeInsets.only(bottom: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(
             color: isSelected
                 ? Theme.of(context).colorScheme.secondary
@@ -420,11 +476,12 @@ class _CartPageState extends State<CartPage> {
             children: [
               Icon(
                 icon,
+                size: 18,
                 color: isSelected
                     ? Theme.of(context).colorScheme.primary
                     : Colors.grey,
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   title,
@@ -439,6 +496,7 @@ class _CartPageState extends State<CartPage> {
               if (isSelected)
                 Icon(
                   Icons.check_circle,
+                  size: 18,
                   color: Theme.of(context).colorScheme.primary,
                 ),
             ],
@@ -448,12 +506,12 @@ class _CartPageState extends State<CartPage> {
     }
 
     return Padding(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       child: ListView(
         children: [
           const Text(
             'Forma de pagamento',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
 
@@ -476,14 +534,14 @@ class _CartPageState extends State<CartPage> {
             ),
           ],
 
-          const SizedBox(height: 30),
+          const SizedBox(height: 20),
 
           // RESUMO EM CARD
           Container(
-            padding: const EdgeInsets.all(14),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(12),
               boxShadow: const [
                 BoxShadow(color: Colors.black12, blurRadius: 6),
               ],
@@ -493,7 +551,7 @@ class _CartPageState extends State<CartPage> {
               children: [
                 const Text(
                   'Resumo do pedido',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 12),
 
@@ -502,12 +560,12 @@ class _CartPageState extends State<CartPage> {
                 if (!cart.isPickup)
                   Text('Entrega: R\$ ${deliveryFee.toStringAsFixed(2)}'),
 
-                const Divider(height: 24),
+                const Divider(height: 18),
 
                 Text(
                   'Total: R\$ ${cart.totalWithDelivery.toStringAsFixed(2)}',
                   style: const TextStyle(
-                    fontSize: 20,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -531,8 +589,16 @@ class _CartPageState extends State<CartPage> {
       child: SafeArea(
         child: Row(
           children: [
-            if (step > 0)
-              TextButton(onPressed: back, child: const Text('Voltar')),
+            TextButton(
+              onPressed: () {
+                if (step == 0) {
+                  Navigator.pop(context); // volta para a Home
+                } else {
+                  back(); // volta step anterior
+                }
+              },
+              child: Text(step == 0 ? 'Início' : 'Voltar'),
+            ),
             const Spacer(),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
