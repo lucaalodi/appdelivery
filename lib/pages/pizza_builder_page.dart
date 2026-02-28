@@ -24,8 +24,9 @@ class _PizzaBuilderPageState extends State<PizzaBuilderPage> {
   @override
   Widget build(BuildContext context) {
     final cart = context.watch<Cart>();
-    final restaurant = cart.selectedRestaurant!;
-
+    final restaurant =
+        cart.selectedRestaurant ??
+        cart.restaurants.firstWhere((r) => r.menu.contains(widget.pizzaBase));
     final flavors = restaurant.menu
         .where((i) => i.category == 'Sabor')
         .toList();

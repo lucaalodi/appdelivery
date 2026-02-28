@@ -81,16 +81,18 @@ class _RestaurantPageState extends State<RestaurantPage> {
                                 )
                               : Container(color: Colors.grey.shade300),
                         ),
-                        Container(
-                          height: 190,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                Colors.black.withOpacity(0.4),
-                                Colors.black.withOpacity(0.7),
-                              ],
+                        Positioned(
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          child: Container(
+                            height: 20, // 🔥 controla o tamanho do fade
+                            decoration: const BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [Colors.transparent, Color(0x55F7F7F7)],
+                              ),
                             ),
                           ),
                         ),

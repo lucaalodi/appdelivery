@@ -201,10 +201,12 @@ class Cart extends ChangeNotifier {
   }
 
   bool addItem(MenuItem item, Restaurant restaurant) {
-    // 👉 Define restaurante se ainda não existir
-    selectedRestaurant ??= restaurant;
+    // define restaurante somente se carrinho estiver vazio
+    if (_items.isEmpty) {
+      selectedRestaurant = restaurant;
+    }
 
-    // 👉 Bloqueia mistura de restaurantes
+    // bloqueia mistura de restaurantes
     if (selectedRestaurant!.id != restaurant.id) {
       return false;
     }
