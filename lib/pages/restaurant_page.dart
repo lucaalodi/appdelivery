@@ -66,93 +66,16 @@ class _RestaurantPageState extends State<RestaurantPage> {
                 ListView(
                   padding: EdgeInsets.zero,
                   children: [
-                    // HEADER
-                    Stack(
-                      children: [
-                        SizedBox(
-                          height: 190,
-                          width: double.infinity,
-                          child: restaurant.bannerUrl.isNotEmpty
-                              ? Image.network(
-                                  restaurant.bannerUrl,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) =>
-                                      Container(color: Colors.grey.shade300),
-                                )
-                              : Container(color: Colors.grey.shade300),
-                        ),
-                        Positioned(
-                          bottom: 0,
-                          left: 0,
-                          right: 0,
-                          child: Container(
-                            height: 20, // 🔥 controla o tamanho do fade
-                            decoration: const BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                colors: [Colors.transparent, Color(0x55F7F7F7)],
-                              ),
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          top: 40,
-                          left: 10,
-                          child: IconButton(
-                            icon: const Icon(
-                              Icons.arrow_back,
-                              color: Colors.white,
-                            ),
-                            onPressed: () => Navigator.pop(context),
-                          ),
-                        ),
-                        Positioned(
-                          bottom: 20,
-                          left: 16,
-                          right: 16,
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 60,
-                                height: 60,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                                child: restaurant.logoUrl.isNotEmpty
-                                    ? ClipRRect(
-                                        borderRadius: BorderRadius.circular(14),
-                                        child: Image.network(
-                                          restaurant.logoUrl,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      )
-                                    : const Icon(Icons.store),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Text(
-                                  restaurant.name,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+                    // ─── NOVO HEADER ───────────────────────────────────────
+                    _RestaurantHeader(restaurant: restaurant),
 
+                    // ───────────────────────────────────────────────────────
                     const SizedBox(height: 12),
 
                     // CATEGORIAS
                     if (categories.length > 1)
                       SizedBox(
-                        height: 45,
+                        height: 20,
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -261,7 +184,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
                   right: 0,
                   child: SafeArea(
                     child: Padding(
-                      padding: const EdgeInsets.all(6), // antes era 10
+                      padding: const EdgeInsets.all(6),
                       child: GestureDetector(
                         onTap: () {
                           Navigator.push(
@@ -270,36 +193,32 @@ class _RestaurantPageState extends State<RestaurantPage> {
                           );
                         },
                         child: Container(
-                          height: 44, // antes era 56
+                          height: 44,
                           decoration: BoxDecoration(
                             color: const Color(0xFFE77427),
-                            borderRadius: BorderRadius.circular(10), // antes 14
+                            borderRadius: BorderRadius.circular(10),
                           ),
                           child: Row(
                             children: [
-                              const SizedBox(width: 12), // antes 16
-
+                              const SizedBox(width: 12),
                               const Expanded(
                                 child: Text(
                                   "Ver minha sacola",
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 14, // antes 16
+                                    fontSize: 14,
                                   ),
                                 ),
                               ),
-
                               Padding(
-                                padding: const EdgeInsets.only(
-                                  right: 12,
-                                ), // antes 16
+                                padding: const EdgeInsets.only(right: 12),
                                 child: Text(
                                   "R\$ ${cart.totalWithDelivery.toStringAsFixed(2)}",
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 14, // adicionado menor
+                                    fontSize: 14,
                                   ),
                                 ),
                               ),
@@ -413,6 +332,284 @@ class _RestaurantPageState extends State<RestaurantPage> {
     );
   }
 }
+
+// ════════════════════════════════════════════════════════════════
+// HEADER COMPLETO DO RESTAURANTE
+// ════════════════════════════════════════════════════════════════
+
+// Altura total do header — ajuste aqui se quiser mais ou menos espaço
+const double _headerHeight = 280.0;
+const double _bannerHeight = 200.0;
+const double _logoSize = 80.0;
+
+class _RestaurantHeader extends StatelessWidget {
+  final Restaurant restaurant;
+  const _RestaurantHeader({required this.restaurant});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: _headerHeight,
+      width: double.infinity,
+      child: Stack(
+        children: [
+          // ── BANNER ──────────────────────────────────────────────
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: _bannerHeight,
+            child: restaurant.bannerUrl.isNotEmpty
+                ? Image.network(
+                    restaurant.bannerUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) =>
+                        Container(color: Colors.grey.shade300),
+                  )
+                : Container(color: Colors.grey.shade300),
+          ),
+
+          // ── BOTÃO VOLTAR ─────────────────────────────────────────
+          Positioned(
+            top: 40,
+            left: 8,
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ),
+
+          // ── LOGO — independente, sempre na frente ────────────────
+          // Mude o valor de 'top' para subir/descer a logo livremente
+          Positioned(
+            top: _bannerHeight - 40,
+            right: 16,
+            child: _LogoBadge(logoUrl: restaurant.logoUrl),
+          ),
+
+          // ── NOME DO RESTAURANTE — independente da logo ───────────
+          // Mude o valor de 'top' para subir/descer o nome livremente
+          Positioned(
+            top: _bannerHeight + 16,
+            left: 16,
+            right: _logoSize + 24,
+            child: Text(
+              restaurant.name,
+              style: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1A1A2E),
+              ),
+            ),
+          ),
+
+          // ── INFOS DA LOJA ────────────────────────────────────────
+          Positioned(
+            top: _bannerHeight + 52,
+            left: 16,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: const [
+                Icon(Icons.info_outline, size: 14, color: Colors.grey),
+                SizedBox(width: 4),
+                Text(
+                  'infos da loja',
+                  style: TextStyle(color: Colors.grey, fontSize: 13),
+                ),
+                Icon(Icons.chevron_right, size: 14, color: Colors.grey),
+              ],
+            ),
+          ),
+
+          // ── DIVIDER ──────────────────────────────────────────────
+          Positioned(
+            top: _bannerHeight + 80,
+            left: 0,
+            right: 0,
+            child: const Divider(height: 1, thickness: 1),
+          ),
+
+          // ── LINHA DE ENTREGA ─────────────────────────────────────
+          Positioned(
+            top: _bannerHeight + 96,
+            left: 16,
+            right: 16,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _InfoTile(
+                  icon: Icons.directions_bike,
+                  iconColor: const Color(0xFF50A773),
+                  topLabel: 'ver taxas',
+                  topLabelColor: const Color(0xFF50A773),
+                  topLabelBold: true,
+                  bottomLabel: 'entrega',
+                ),
+                _InfoTile(
+                  icon: Icons.access_time,
+                  topLabel: '60 - 90',
+                  bottomLabel: 'minutos',
+                ),
+                _InfoTile(
+                  icon: Icons.bookmark_border,
+                  topLabel: 'R\$ 20',
+                  bottomLabel: 'mínimo',
+                ),
+                _InfoTile(
+                  icon: Icons.payment,
+                  topLabel: '',
+                  bottomLabel: 'pagamento',
+                  extraIcon: Icons.home_outlined,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ────────────────────────────────────────────────────────────────
+// BADGE DE RATING
+
+// ────────────────────────────────────────────────────────────────
+
+class _RatingBadge extends StatelessWidget {
+  final double rating;
+  const _RatingBadge({required this.rating});
+
+  @override
+  Widget build(BuildContext context) {
+    // Não exibe se não houver rating
+    if (rating <= 0) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFC107),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.star, color: Colors.white, size: 16),
+          const SizedBox(width: 4),
+          Text(
+            rating.toStringAsFixed(1),
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+            ),
+          ),
+          const SizedBox(width: 2),
+          const Icon(Icons.chevron_right, color: Colors.white, size: 16),
+        ],
+      ),
+    );
+  }
+}
+
+// ────────────────────────────────────────────────────────────────
+// LOGO COM SOMBRA
+// ────────────────────────────────────────────────────────────────
+
+class _LogoBadge extends StatelessWidget {
+  final String logoUrl;
+  const _LogoBadge({required this.logoUrl});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 80,
+      height: 80,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.15),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: logoUrl.isNotEmpty
+            ? Image.network(logoUrl, fit: BoxFit.cover)
+            : const Icon(Icons.store, size: 36, color: Colors.grey),
+      ),
+    );
+  }
+}
+
+// ────────────────────────────────────────────────────────────────
+// TILE DE INFO (entrega / tempo / mínimo / pagamento)
+// ────────────────────────────────────────────────────────────────
+
+class _InfoTile extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
+  final String topLabel;
+  final Color? topLabelColor;
+  final bool topLabelBold;
+  final String bottomLabel;
+  final IconData? extraIcon;
+
+  const _InfoTile({
+    required this.icon,
+    this.iconColor = Colors.grey,
+    required this.topLabel,
+    this.topLabelColor,
+    this.topLabelBold = false,
+    required this.bottomLabel,
+    this.extraIcon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        // Ícone(s)
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 18, color: iconColor),
+            if (extraIcon != null) ...[
+              const SizedBox(width: 2),
+              Icon(extraIcon, size: 18, color: Colors.grey),
+            ],
+          ],
+        ),
+        const SizedBox(height: 4),
+
+        // Valor principal (ex: "ver taxas", "60 - 90", "R$ 20")
+        if (topLabel.isNotEmpty)
+          Text(
+            topLabel,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: topLabelBold ? FontWeight.bold : FontWeight.normal,
+              color: topLabelColor ?? const Color(0xFF1A1A2E),
+            ),
+          ),
+        const SizedBox(height: 2),
+
+        // Label inferior (ex: "entrega", "minutos", "mínimo")
+        Text(
+          bottomLabel,
+          style: const TextStyle(fontSize: 12, color: Colors.grey),
+        ),
+      ],
+    );
+  }
+}
+
+// ════════════════════════════════════════════════════════════════
+// BOTÃO ADICIONAR (sem alterações)
+// ════════════════════════════════════════════════════════════════
 
 class AddButton extends StatefulWidget {
   final VoidCallback onTap;
