@@ -39,7 +39,6 @@ class AdminPage extends StatelessWidget {
                           size: 32,
                         ),
                         const SizedBox(width: 12),
-
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -55,7 +54,6 @@ class AdminPage extends StatelessWidget {
                                       ),
                                     ),
                                   ),
-
                                   IconButton(
                                     icon: const Icon(Icons.edit),
                                     onPressed: () =>
@@ -71,9 +69,7 @@ class AdminPage extends StatelessWidget {
                                   ),
                                 ],
                               ),
-
                               const SizedBox(height: 4),
-
                               Row(
                                 children: [
                                   Text('📞 ${r.phone}'),
@@ -81,13 +77,13 @@ class AdminPage extends StatelessWidget {
                                   Text('🔑 ${r.pixKey}'),
                                 ],
                               ),
-
                               const SizedBox(height: 4),
-
                               Text('📝 ${r.description}'),
-
+                              if (r.address.isNotEmpty) ...[
+                                const SizedBox(height: 4),
+                                Text('📍 ${r.address}'),
+                              ],
                               const SizedBox(height: 8),
-
                               Row(
                                 children: [
                                   Expanded(
@@ -107,7 +103,6 @@ class AdminPage extends StatelessWidget {
                     ),
 
                     const Divider(),
-                    // ===== CARDÁPIO =====
                     if (r.menu.isNotEmpty)
                       Column(
                         children: r.menu.map((item) {
@@ -122,9 +117,8 @@ class AdminPage extends StatelessWidget {
                               children: [
                                 IconButton(
                                   icon: const Icon(Icons.edit),
-                                  onPressed: () {
-                                    _showEditItem(context, r, item);
-                                  },
+                                  onPressed: () =>
+                                      _showEditItem(context, r, item),
                                 ),
                                 IconButton(
                                   icon: const Icon(
@@ -157,9 +151,7 @@ class AdminPage extends StatelessWidget {
           const SizedBox(height: 20),
 
           ElevatedButton.icon(
-            onPressed: () {
-              _showAddRestaurant(context);
-            },
+            onPressed: () => _showAddRestaurant(context),
             icon: const Icon(Icons.add),
             label: const Text('Adicionar restaurante'),
           ),
@@ -167,8 +159,6 @@ class AdminPage extends StatelessWidget {
       ),
     );
   }
-
-  // ================= RESTAURANTE =================
 
   void _showAddRestaurant(BuildContext context) {
     final name = TextEditingController();
@@ -180,6 +170,7 @@ class AdminPage extends StatelessWidget {
     final openTime = TextEditingController();
     final closeTime = TextEditingController();
     final deliveryFee = TextEditingController();
+    final address = TextEditingController(); // NOVO
 
     showDialog(
       context: context,
@@ -195,80 +186,72 @@ class AdminPage extends StatelessWidget {
                   'Novo restaurante',
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
-
                 const SizedBox(height: 20),
 
-                /// ================= INFORMAÇÕES BÁSICAS =================
                 Text(
                   'Informações básicas',
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
-
                 const SizedBox(height: 12),
-
                 TextField(
                   controller: name,
                   decoration: const InputDecoration(labelText: 'Nome'),
                 ),
-
                 const SizedBox(height: 12),
-
                 TextField(
                   controller: description,
                   decoration: const InputDecoration(labelText: 'Descrição'),
                   maxLines: 2,
                 ),
-
                 const SizedBox(height: 20),
 
-                /// ================= CONTATO =================
-                Text('Contato', style: Theme.of(context).textTheme.titleMedium),
-
+                Text(
+                  'Localização',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
                 const SizedBox(height: 12),
+                TextField(
+                  controller: address,
+                  decoration: const InputDecoration(
+                    labelText: 'Endereço',
+                    hintText: 'Rua, número, bairro, cidade',
+                  ),
+                ),
+                const SizedBox(height: 20),
 
+                Text('Contato', style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 12),
                 TextField(
                   controller: phone,
                   decoration: const InputDecoration(labelText: 'WhatsApp'),
                 ),
-
                 const SizedBox(height: 12),
-
                 TextField(
                   controller: pix,
                   decoration: const InputDecoration(labelText: 'Chave Pix'),
                 ),
-
                 const SizedBox(height: 20),
 
-                /// ================= IMAGENS =================
                 Text('Imagens', style: Theme.of(context).textTheme.titleMedium),
-
                 const SizedBox(height: 12),
-
                 TextField(
                   controller: logoUrl,
                   decoration: const InputDecoration(
                     labelText: 'Logo (URL da imagem)',
                   ),
                 ),
-
                 const SizedBox(height: 12),
-
                 TextField(
                   controller: bannerUrl,
                   decoration: const InputDecoration(labelText: 'URL do Banner'),
                 ),
-
                 const SizedBox(height: 20),
 
-                /// ================= HORÁRIO =================
                 Text(
                   'Horário de funcionamento',
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
-
                 const SizedBox(height: 12),
-
                 Row(
                   children: [
                     Expanded(
@@ -290,14 +273,10 @@ class AdminPage extends StatelessWidget {
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 20),
 
-                /// ================= ENTREGA =================
                 Text('Entrega', style: Theme.of(context).textTheme.titleMedium),
-
                 const SizedBox(height: 12),
-
                 TextField(
                   controller: deliveryFee,
                   keyboardType: TextInputType.number,
@@ -306,10 +285,8 @@ class AdminPage extends StatelessWidget {
                     prefixText: 'R\$ ',
                   ),
                 ),
-
                 const SizedBox(height: 30),
 
-                /// ================= BOTÕES =================
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -330,8 +307,8 @@ class AdminPage extends StatelessWidget {
                           openTime.text,
                           closeTime.text,
                           double.tryParse(deliveryFee.text) ?? 0,
+                          address.text, // NOVO
                         );
-
                         Navigator.pop(dialogContext);
                       },
                       child: const Text('Salvar'),
@@ -359,6 +336,7 @@ void _showEditRestaurant(BuildContext context, Restaurant restaurant) {
   final deliveryFee = TextEditingController(
     text: restaurant.deliveryFee.toString(),
   );
+  final address = TextEditingController(text: restaurant.address); // NOVO
 
   showDialog(
     context: context,
@@ -374,80 +352,72 @@ void _showEditRestaurant(BuildContext context, Restaurant restaurant) {
                 'Editar restaurante',
                 style: Theme.of(context).textTheme.titleLarge,
               ),
-
               const SizedBox(height: 20),
 
-              /// ================= INFORMAÇÕES BÁSICAS =================
               Text(
                 'Informações básicas',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
-
               const SizedBox(height: 12),
-
               TextField(
                 controller: name,
                 decoration: const InputDecoration(labelText: 'Nome'),
               ),
-
               const SizedBox(height: 12),
-
               TextField(
                 controller: description,
                 decoration: const InputDecoration(labelText: 'Descrição'),
                 maxLines: 2,
               ),
-
               const SizedBox(height: 20),
 
-              /// ================= CONTATO =================
-              Text('Contato', style: Theme.of(context).textTheme.titleMedium),
-
+              Text(
+                'Localização',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
               const SizedBox(height: 12),
+              TextField(
+                controller: address,
+                decoration: const InputDecoration(
+                  labelText: 'Endereço',
+                  hintText: 'Rua, número, bairro, cidade',
+                ),
+              ),
+              const SizedBox(height: 20),
 
+              Text('Contato', style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 12),
               TextField(
                 controller: phone,
                 decoration: const InputDecoration(labelText: 'WhatsApp'),
               ),
-
               const SizedBox(height: 12),
-
               TextField(
                 controller: pix,
                 decoration: const InputDecoration(labelText: 'Chave Pix'),
               ),
-
               const SizedBox(height: 20),
 
-              /// ================= IMAGENS =================
               Text('Imagens', style: Theme.of(context).textTheme.titleMedium),
-
               const SizedBox(height: 12),
-
               TextField(
                 controller: logoUrl,
                 decoration: const InputDecoration(
                   labelText: 'Logo (URL da imagem)',
                 ),
               ),
-
               const SizedBox(height: 12),
-
               TextField(
                 controller: bannerUrl,
                 decoration: const InputDecoration(labelText: 'URL do Banner'),
               ),
-
               const SizedBox(height: 20),
 
-              /// ================= HORÁRIO =================
               Text(
                 'Horário de funcionamento',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
-
               const SizedBox(height: 12),
-
               Row(
                 children: [
                   Expanded(
@@ -469,14 +439,10 @@ void _showEditRestaurant(BuildContext context, Restaurant restaurant) {
                   ),
                 ],
               ),
-
               const SizedBox(height: 20),
 
-              /// ================= ENTREGA =================
               Text('Entrega', style: Theme.of(context).textTheme.titleMedium),
-
               const SizedBox(height: 12),
-
               TextField(
                 controller: deliveryFee,
                 keyboardType: TextInputType.number,
@@ -485,10 +451,8 @@ void _showEditRestaurant(BuildContext context, Restaurant restaurant) {
                   prefixText: 'R\$ ',
                 ),
               ),
-
               const SizedBox(height: 30),
 
-              /// ================= BOTÕES =================
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -519,9 +483,9 @@ void _showEditRestaurant(BuildContext context, Restaurant restaurant) {
                               restaurant.deliveryFee,
                           ordersCount: restaurant.ordersCount,
                           totalRevenue: restaurant.totalRevenue,
+                          address: address.text, // NOVO
                         ),
                       );
-
                       Navigator.pop(dialogContext);
                     },
                     child: const Text('Salvar'),
@@ -535,8 +499,6 @@ void _showEditRestaurant(BuildContext context, Restaurant restaurant) {
     ),
   );
 }
-
-// ================= ITENS =================
 
 void _showAddItem(BuildContext context, Restaurant restaurant) {
   final name = TextEditingController();
@@ -559,48 +521,36 @@ void _showAddItem(BuildContext context, Restaurant restaurant) {
                 'Novo item - ${restaurant.name}',
                 style: Theme.of(context).textTheme.titleLarge,
               ),
-
               const SizedBox(height: 20),
-
               TextField(
                 controller: name,
                 decoration: const InputDecoration(labelText: 'Nome do item'),
               ),
-
               const SizedBox(height: 14),
-
               TextField(
                 controller: description,
                 decoration: const InputDecoration(labelText: 'Descrição'),
                 maxLines: 2,
               ),
-
               const SizedBox(height: 14),
-
               TextField(
                 controller: imageUrl,
                 decoration: const InputDecoration(labelText: 'URL da imagem'),
               ),
-
               const SizedBox(height: 14),
-
               TextField(
                 controller: category,
                 decoration: const InputDecoration(
                   labelText: 'Categoria (Pizza, Lanche...)',
                 ),
               ),
-
               const SizedBox(height: 14),
-
               TextField(
                 controller: price,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(labelText: 'Preço'),
               ),
-
               const SizedBox(height: 24),
-
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -622,7 +572,6 @@ void _showAddItem(BuildContext context, Restaurant restaurant) {
                           imageUrl: imageUrl.text,
                         ),
                       );
-
                       Navigator.pop(dialogContext);
                     },
                     child: const Text('Salvar'),
@@ -658,46 +607,34 @@ void _showEditItem(BuildContext context, Restaurant restaurant, MenuItem item) {
                 'Editar item - ${restaurant.name}',
                 style: Theme.of(context).textTheme.titleLarge,
               ),
-
               const SizedBox(height: 20),
-
               TextField(
                 controller: name,
                 decoration: const InputDecoration(labelText: 'Nome'),
               ),
-
               const SizedBox(height: 14),
-
               TextField(
                 controller: description,
                 decoration: const InputDecoration(labelText: 'Descrição'),
                 maxLines: 2,
               ),
-
               const SizedBox(height: 14),
-
               TextField(
                 controller: imageUrl,
                 decoration: const InputDecoration(labelText: 'URL da imagem'),
               ),
-
               const SizedBox(height: 14),
-
               TextField(
                 controller: category,
                 decoration: const InputDecoration(labelText: 'Categoria'),
               ),
-
               const SizedBox(height: 14),
-
               TextField(
                 controller: price,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(labelText: 'Preço'),
               ),
-
               const SizedBox(height: 24),
-
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -719,7 +656,6 @@ void _showEditItem(BuildContext context, Restaurant restaurant, MenuItem item) {
                           imageUrl: imageUrl.text,
                         ),
                       );
-
                       Navigator.pop(dialogContext);
                     },
                     child: const Text('Salvar'),
@@ -748,15 +684,11 @@ void _confirmDelete(BuildContext context, Restaurant restaurant) {
               'Excluir restaurante',
               style: Theme.of(context).textTheme.titleLarge,
             ),
-
             const SizedBox(height: 16),
-
             Text(
               'Tem certeza que deseja excluir "${restaurant.name}"?\n\nEssa ação não poderá ser desfeita.',
             ),
-
             const SizedBox(height: 24),
-
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [

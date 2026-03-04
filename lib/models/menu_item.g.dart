@@ -29,7 +29,7 @@ class MenuItemAdapter extends TypeAdapter<MenuItem> {
   @override
   void write(BinaryWriter writer, MenuItem obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -39,7 +39,9 @@ class MenuItemAdapter extends TypeAdapter<MenuItem> {
       ..writeByte(3)
       ..write(obj.category)
       ..writeByte(4)
-      ..write(obj.price);
+      ..write(obj.price)
+      ..writeByte(5)
+      ..write(obj.imageUrl);
   }
 
   @override

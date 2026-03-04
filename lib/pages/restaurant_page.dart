@@ -75,7 +75,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
                     // CATEGORIAS
                     if (categories.length > 1)
                       SizedBox(
-                        height: 20,
+                        height: 32,
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -174,6 +174,38 @@ class _RestaurantPageState extends State<RestaurantPage> {
 
                     const SizedBox(height: 100),
                   ],
+                ),
+
+                // BARRA SUPERIOR COM GRADIENTE — fixa, sempre visível
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.black.withOpacity(0.75),
+                          Colors.transparent,
+                        ],
+                      ),
+                    ),
+                    child: SafeArea(
+                      child: Row(
+                        children: [
+                          IconButton(
+                            icon: const Icon(
+                              Icons.arrow_back,
+                              color: Colors.white,
+                            ),
+                            onPressed: () => Navigator.pop(context),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
 
                 // SACOLA
@@ -337,8 +369,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
 // HEADER COMPLETO DO RESTAURANTE
 // ════════════════════════════════════════════════════════════════
 
-// Altura total do header — ajuste aqui se quiser mais ou menos espaço
-const double _headerHeight = 280.0;
+const double _headerHeight = 350.0;
 const double _bannerHeight = 200.0;
 const double _logoSize = 80.0;
 
@@ -369,28 +400,24 @@ class _RestaurantHeader extends StatelessWidget {
                 : Container(color: Colors.grey.shade300),
           ),
 
-          // ── BOTÃO VOLTAR ─────────────────────────────────────────
-          Positioned(
-            top: 40,
-            left: 8,
-            child: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ),
-
           // ── LOGO — independente, sempre na frente ────────────────
-          // Mude o valor de 'top' para subir/descer a logo livremente
           Positioned(
             top: _bannerHeight - 40,
             right: 16,
             child: _LogoBadge(logoUrl: restaurant.logoUrl),
           ),
 
-          // ── NOME DO RESTAURANTE — independente da logo ───────────
-          // Mude o valor de 'top' para subir/descer o nome livremente
+          // ── AVALIAÇÃO — centralizada com a logo ─────────────────
           Positioned(
-            top: _bannerHeight + 16,
+            top: _bannerHeight - 40 + _logoSize + 6,
+            right: 16,
+            width: _logoSize,
+            child: Center(child: _StarRating(rating: 4.8)),
+          ),
+
+          // ── NOME DO RESTAURANTE — independente da logo ───────────
+          Positioned(
+            top: _bannerHeight + 6,
             left: 16,
             right: _logoSize + 24,
             child: Text(
@@ -403,63 +430,100 @@ class _RestaurantHeader extends StatelessWidget {
             ),
           ),
 
+          // ── ENDEREÇO — abaixo do nome ────────────────────────────
+          if (restaurant.address.isNotEmpty)
+            Positioned(
+              top: _bannerHeight + 52,
+              left: 16,
+              right: _logoSize + 24,
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.location_on_outlined,
+                    size: 14,
+                    color: Colors.grey,
+                  ),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      restaurant.address,
+                      style: const TextStyle(color: Colors.grey, fontSize: 13),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
           // ── INFOS DA LOJA ────────────────────────────────────────
           Positioned(
-            top: _bannerHeight + 52,
+            top: _bannerHeight + 72,
             left: 16,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: const [
-                Icon(Icons.info_outline, size: 14, color: Colors.grey),
-                SizedBox(width: 4),
-                Text(
-                  'infos da loja',
-                  style: TextStyle(color: Colors.grey, fontSize: 13),
-                ),
-                Icon(Icons.chevron_right, size: 14, color: Colors.grey),
-              ],
+            child: GestureDetector(
+              onTap: () => _showInfosDialog(context, restaurant),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: const [
+                  Icon(Icons.info_outline, size: 14, color: Colors.grey),
+                  SizedBox(width: 4),
+                  Text(
+                    'infos da loja',
+                    style: TextStyle(color: Colors.grey, fontSize: 13),
+                  ),
+                  Icon(Icons.chevron_right, size: 14, color: Colors.grey),
+                ],
+              ),
             ),
           ),
 
           // ── DIVIDER ──────────────────────────────────────────────
           Positioned(
-            top: _bannerHeight + 80,
+            top: _bannerHeight + 100,
             left: 0,
             right: 0,
-            child: const Divider(height: 1, thickness: 1),
+            child: Divider(
+              height: 1,
+              thickness: 1,
+              color: Colors.grey.shade200,
+            ),
           ),
 
-          // ── LINHA DE ENTREGA ─────────────────────────────────────
+          // ── LINHA DE INFOS ────────────────────────────────────────
           Positioned(
-            top: _bannerHeight + 96,
+            top: _bannerHeight + 108,
             left: 16,
             right: 16,
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                _InfoTile(
+                _InfoTileHorizontal(
                   icon: Icons.directions_bike,
-                  iconColor: const Color(0xFF50A773),
-                  topLabel: 'ver taxas',
-                  topLabelColor: const Color(0xFF50A773),
-                  topLabelBold: true,
-                  bottomLabel: 'entrega',
+                  label: restaurant.deliveryFee == 0
+                      ? 'Grátis'
+                      : 'R\$ ${restaurant.deliveryFee.toStringAsFixed(2)}',
+                  sublabel: 'Taxa',
                 ),
-                _InfoTile(
+                const SizedBox(width: 16),
+                _InfoTileHorizontal(
                   icon: Icons.access_time,
-                  topLabel: '60 - 90',
-                  bottomLabel: 'minutos',
+                  label: '${restaurant.openTime} - ${restaurant.closeTime}',
+                  sublabel: 'Expediente',
                 ),
-                _InfoTile(
-                  icon: Icons.bookmark_border,
-                  topLabel: 'R\$ 20',
-                  bottomLabel: 'mínimo',
+                const SizedBox(width: 16),
+                _InfoTileHorizontal(
+                  icon: Icons.star,
+                  label: '5.0',
+                  sublabel: 'Avaliação',
                 ),
-                _InfoTile(
-                  icon: Icons.payment,
-                  topLabel: '',
-                  bottomLabel: 'pagamento',
-                  extraIcon: Icons.home_outlined,
+                const SizedBox(width: 16),
+                _InfoTileIcons(
+                  icons: [
+                    Icons.credit_card_outlined,
+                    Icons.pix,
+                    Icons.attach_money,
+                  ],
+                  sublabel: 'Pagamento',
                 ),
               ],
             ),
@@ -471,42 +535,20 @@ class _RestaurantHeader extends StatelessWidget {
 }
 
 // ────────────────────────────────────────────────────────────────
-// BADGE DE RATING
-
+// AVALIAÇÃO COM ESTRELAS
 // ────────────────────────────────────────────────────────────────
 
-class _RatingBadge extends StatelessWidget {
+class _StarRating extends StatelessWidget {
   final double rating;
-  const _RatingBadge({required this.rating});
+  const _StarRating({required this.rating});
 
   @override
   Widget build(BuildContext context) {
-    // Não exibe se não houver rating
-    if (rating <= 0) return const SizedBox.shrink();
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFFC107),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.star, color: Colors.white, size: 16),
-          const SizedBox(width: 4),
-          Text(
-            rating.toStringAsFixed(1),
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-            ),
-          ),
-          const SizedBox(width: 2),
-          const Icon(Icons.chevron_right, color: Colors.white, size: 16),
-        ],
-      ),
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(5, (i) {
+        return const Icon(Icons.star, color: Color(0xFFFFC107), size: 16);
+      }),
     );
   }
 }
@@ -546,60 +588,77 @@ class _LogoBadge extends StatelessWidget {
 }
 
 // ────────────────────────────────────────────────────────────────
-// TILE DE INFO (entrega / tempo / mínimo / pagamento)
+// TILE HORIZONTAL — ícone + valor lado a lado
 // ────────────────────────────────────────────────────────────────
 
-class _InfoTile extends StatelessWidget {
+class _InfoTileHorizontal extends StatelessWidget {
   final IconData icon;
-  final Color iconColor;
-  final String topLabel;
-  final Color? topLabelColor;
-  final bool topLabelBold;
-  final String bottomLabel;
-  final IconData? extraIcon;
+  final String label;
+  final String sublabel;
 
-  const _InfoTile({
+  const _InfoTileHorizontal({
     required this.icon,
-    this.iconColor = Colors.grey,
-    required this.topLabel,
-    this.topLabelColor,
-    this.topLabelBold = false,
-    required this.bottomLabel,
-    this.extraIcon,
+    required this.label,
+    required this.sublabel,
   });
 
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        // Ícone(s)
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 18, color: iconColor),
-            if (extraIcon != null) ...[
-              const SizedBox(width: 2),
-              Icon(extraIcon, size: 18, color: Colors.grey),
-            ],
+            Icon(icon, size: 18, color: Colors.grey),
+            const SizedBox(width: 5),
+            Text(
+              label,
+              style: const TextStyle(fontSize: 14, color: Color(0xFF1A1A2E)),
+            ),
           ],
         ),
-        const SizedBox(height: 4),
-
-        // Valor principal (ex: "ver taxas", "60 - 90", "R$ 20")
-        if (topLabel.isNotEmpty)
-          Text(
-            topLabel,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: topLabelBold ? FontWeight.bold : FontWeight.normal,
-              color: topLabelColor ?? const Color(0xFF1A1A2E),
-            ),
-          ),
         const SizedBox(height: 2),
-
-        // Label inferior (ex: "entrega", "minutos", "mínimo")
         Text(
-          bottomLabel,
+          sublabel,
+          style: const TextStyle(fontSize: 12, color: Colors.grey),
+        ),
+      ],
+    );
+  }
+}
+
+// ────────────────────────────────────────────────────────────────
+// TILE DE ÍCONES — múltiplos ícones + label embaixo
+// ────────────────────────────────────────────────────────────────
+
+class _InfoTileIcons extends StatelessWidget {
+  final List<IconData> icons;
+  final String sublabel;
+
+  const _InfoTileIcons({required this.icons, required this.sublabel});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: icons
+              .map(
+                (icon) => Padding(
+                  padding: const EdgeInsets.only(right: 4),
+                  child: Icon(icon, size: 18, color: Colors.grey),
+                ),
+              )
+              .toList(),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          sublabel,
           style: const TextStyle(fontSize: 12, color: Colors.grey),
         ),
       ],
@@ -608,7 +667,79 @@ class _InfoTile extends StatelessWidget {
 }
 
 // ════════════════════════════════════════════════════════════════
-// BOTÃO ADICIONAR (sem alterações)
+// MODAL DE INFOS DA LOJA
+// ════════════════════════════════════════════════════════════════
+
+void _showInfosDialog(BuildContext context, Restaurant restaurant) {
+  showModalBottomSheet(
+    context: context,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (_) => Padding(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            restaurant.name,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 16),
+
+          if (restaurant.address.isNotEmpty) ...[
+            Row(
+              children: [
+                const Icon(
+                  Icons.location_on_outlined,
+                  size: 18,
+                  color: Colors.grey,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    restaurant.address,
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+          ],
+
+          Row(
+            children: [
+              const Icon(
+                Icons.access_time_outlined,
+                size: 18,
+                color: Colors.grey,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Abre às ${restaurant.openTime} • Fecha às ${restaurant.closeTime}',
+                style: const TextStyle(fontSize: 14),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          Row(
+            children: [
+              const Icon(Icons.phone_outlined, size: 18, color: Colors.grey),
+              const SizedBox(width: 8),
+              Text(restaurant.phone, style: const TextStyle(fontSize: 14)),
+            ],
+          ),
+          const SizedBox(height: 24),
+        ],
+      ),
+    ),
+  );
+}
+
+// ════════════════════════════════════════════════════════════════
+// BOTÃO ADICIONAR
 // ════════════════════════════════════════════════════════════════
 
 class AddButton extends StatefulWidget {

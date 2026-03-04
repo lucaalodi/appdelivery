@@ -19,7 +19,9 @@ class _HomePageState extends State<HomePage> {
 
   String? selectedCategory;
   String searchText = '';
-  final String _adminPassword = "912708"; // altere para sua senha
+  final ScrollController _categoryScroll = ScrollController();
+  final ValueNotifier<int> _categoryPage = ValueNotifier(0);
+  final String _adminPassword = "912708";
 
   final categories = const [
     {'image': 'assets/categories/hamburguer.png', 'name': 'Hamburguer'},
@@ -33,7 +35,6 @@ class _HomePageState extends State<HomePage> {
 
   void _handleSecretTap() {
     _tapCount++;
-
     if (_tapCount == 5) {
       _tapCount = 0;
       _showPasswordDialog();
@@ -42,7 +43,6 @@ class _HomePageState extends State<HomePage> {
 
   void _showPasswordDialog() {
     final controller = TextEditingController();
-
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -62,14 +62,12 @@ class _HomePageState extends State<HomePage> {
             onPressed: () {
               if (controller.text == _adminPassword) {
                 Navigator.pop(context);
-
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => const AdminPage()),
                 );
               } else {
                 Navigator.pop(context);
-
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text("Senha incorreta")),
                 );
@@ -82,11 +80,17 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  @override
+  void dispose() {
+    _categoryScroll.dispose();
+    _categoryPage.dispose();
+    super.dispose();
+  }
+
   List<Widget> _pages(BuildContext context) {
     return [_buildHome(context), const CartPage()];
   }
 
-  // Footer
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -96,19 +100,14 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Colors.white,
         selectedItemColor: const Color.fromARGB(255, 187, 88, 31),
         unselectedItemColor: Colors.grey,
-
         currentIndex: _currentIndex,
         onTap: (i) => setState(() => _currentIndex = i),
-
         type: BottomNavigationBarType.fixed,
-
-        iconSize: 24, // 🔥 menor
-        selectedFontSize: 11, // 🔥 menor
-        unselectedFontSize: 10, // 🔥 menor
-
+        iconSize: 24,
+        selectedFontSize: 11,
+        unselectedFontSize: 10,
         selectedLabelStyle: const TextStyle(height: 1),
         unselectedLabelStyle: const TextStyle(height: 1),
-
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Início'),
           BottomNavigationBarItem(
@@ -130,11 +129,9 @@ class _HomePageState extends State<HomePage> {
                 .toLowerCase()
                 .split(',')
                 .any((t) => t.trim() == selectedCategory!.toLowerCase());
-
       final matchesSearch = r.name.toLowerCase().contains(
         searchText.toLowerCase(),
       );
-
       return matchesCategory && matchesSearch;
     }).toList();
 
@@ -149,7 +146,7 @@ class _HomePageState extends State<HomePage> {
               physics: const BouncingScrollPhysics(),
               padding: EdgeInsets.zero,
               children: [
-                // ================= HEADER SUPER COMPACTO =================
+                // ================= HEADER =================
                 Container(
                   padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
                   color: const Color.fromARGB(255, 231, 116, 39),
@@ -172,7 +169,6 @@ class _HomePageState extends State<HomePage> {
                         style: TextStyle(fontSize: 13, color: Colors.white70),
                       ),
                       const SizedBox(height: 8),
-
                       SizedBox(
                         height: 36,
                         child: TextField(
@@ -216,101 +212,149 @@ class _HomePageState extends State<HomePage> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Column(
                     children: [
-                      // ================= CATEGORIAS ESTILO IFOOD (IMAGEM 3D AJUSTADA) =================
-                      SizedBox(
-                        height: 105, // 🔥 antes 130
-                        child: ListView.builder(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          scrollDirection: Axis.horizontal,
-                          itemCount: categories.length,
-                          itemBuilder: (context, index) {
-                            final cat = categories[index];
-                            final isSelected = selectedCategory == cat['name'];
+                      // ================= CATEGORIAS COM PONTOS =================
+                      Column(
+                        children: [
+                          SizedBox(
+                            height: 105,
+                            child: ListView.builder(
+                              controller: _categoryScroll,
+                              padding: EdgeInsets.zero,
+                              scrollDirection: Axis.horizontal,
+                              itemCount: categories.length,
+                              itemBuilder: (context, index) {
+                                final cat = categories[index];
+                                final isSelected =
+                                    selectedCategory == cat['name'];
 
-                            return GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  selectedCategory = isSelected
-                                      ? null
-                                      : cat['name'] as String;
-                                });
-                              },
-                              child: Container(
-                                width: 78, // 🔥 antes 95
-                                margin: const EdgeInsets.only(
-                                  right: 10,
-                                ), // 🔥 antes 12
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    AnimatedContainer(
-                                      duration: const Duration(
-                                        milliseconds: 180,
-                                      ),
-                                      height: 64, // 🔥 antes 85
-                                      width: 78,
-                                      decoration: BoxDecoration(
-                                        color: isSelected
-                                            ? const Color.fromARGB(
-                                                255,
-                                                255,
-                                                237,
-                                                224,
-                                              )
-                                            : Colors.grey.shade200,
-                                        borderRadius: BorderRadius.circular(
-                                          16,
-                                        ), // 🔥 antes 20
-                                        border: isSelected
-                                            ? Border.all(
-                                                color: const Color.fromARGB(
-                                                  255,
-                                                  231,
-                                                  116,
-                                                  39,
-                                                ),
-                                                width: 1.3,
-                                              )
-                                            : null,
-                                      ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(
-                                          6,
-                                        ), // 🔥 melhor proporção
-                                        child: Image.asset(
-                                          cat['image'] as String,
-                                          fit: BoxFit.contain,
+                                return GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      selectedCategory = isSelected
+                                          ? null
+                                          : cat['name'] as String;
+                                    });
+                                  },
+                                  child: Container(
+                                    width: 78,
+                                    margin: const EdgeInsets.only(right: 10),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        AnimatedContainer(
+                                          duration: const Duration(
+                                            milliseconds: 180,
+                                          ),
+                                          height: 64,
+                                          width: 78,
+                                          decoration: BoxDecoration(
+                                            color: isSelected
+                                                ? const Color.fromARGB(
+                                                    255,
+                                                    255,
+                                                    237,
+                                                    224,
+                                                  )
+                                                : Colors.grey.shade200,
+                                            borderRadius: BorderRadius.circular(
+                                              16,
+                                            ),
+                                            border: isSelected
+                                                ? Border.all(
+                                                    color: const Color.fromARGB(
+                                                      255,
+                                                      231,
+                                                      116,
+                                                      39,
+                                                    ),
+                                                    width: 1.3,
+                                                  )
+                                                : null,
+                                          ),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(6),
+                                            child: Image.asset(
+                                              cat['image'] as String,
+                                              fit: BoxFit.contain,
+                                            ),
+                                          ),
                                         ),
-                                      ),
+                                        const SizedBox(height: 5),
+                                        Text(
+                                          cat['name'] as String,
+                                          textAlign: TextAlign.center,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w500,
+                                            color: isSelected
+                                                ? const Color.fromARGB(
+                                                    255,
+                                                    231,
+                                                    116,
+                                                    39,
+                                                  )
+                                                : Colors.black87,
+                                          ),
+                                        ),
+                                      ],
                                     ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
 
-                                    const SizedBox(height: 5), // 🔥 antes 8
-
-                                    Text(
-                                      cat['name'] as String,
-                                      textAlign: TextAlign.center,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontSize: 12, // 🔥 antes 13
-                                        fontWeight: FontWeight.w500,
-                                        color: isSelected
-                                            ? const Color.fromARGB(
-                                                255,
-                                                231,
-                                                116,
-                                                39,
-                                              )
-                                            : Colors.black87,
-                                      ),
+                          // PONTOS INDICADORES — reativos e leves
+                          const SizedBox(height: 8),
+                          ValueListenableBuilder<int>(
+                            valueListenable: _categoryPage,
+                            builder: (_, page, __) {
+                              // Atualiza o page ao scrollar
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                if (_categoryScroll.hasClients) {
+                                  _categoryScroll.position.isScrollingNotifier
+                                      .addListener(() {
+                                        final max = _categoryScroll
+                                            .position
+                                            .maxScrollExtent;
+                                        final cur = _categoryScroll.offset;
+                                        if (max > 0) {
+                                          _categoryPage.value = (cur / max * 2)
+                                              .round();
+                                        }
+                                      });
+                                }
+                              });
+                              return Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: List.generate(3, (i) {
+                                  return Container(
+                                    margin: const EdgeInsets.symmetric(
+                                      horizontal: 3,
                                     ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                        ),
+                                    width: 6,
+                                    height: 6,
+                                    decoration: BoxDecoration(
+                                      color: i == page
+                                          ? const Color.fromARGB(
+                                              255,
+                                              231,
+                                              116,
+                                              39,
+                                            )
+                                          : Colors.grey.shade300,
+                                      borderRadius: BorderRadius.circular(3),
+                                    ),
+                                  );
+                                }),
+                              );
+                            },
+                          ),
+                        ],
                       ),
+
                       // ================= ABERTOS =================
                       if (openRestaurants.isNotEmpty) ...[
                         const Align(

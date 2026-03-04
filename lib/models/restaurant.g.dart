@@ -30,13 +30,14 @@ class RestaurantAdapter extends TypeAdapter<Restaurant> {
       deliveryFee: fields[10] as double,
       ordersCount: fields[11] as int,
       totalRevenue: fields[12] as double,
+      address: fields[13] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, Restaurant obj) {
     writer
-      ..writeByte(13)
+      ..writeByte(14)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -62,7 +63,9 @@ class RestaurantAdapter extends TypeAdapter<Restaurant> {
       ..writeByte(11)
       ..write(obj.ordersCount)
       ..writeByte(12)
-      ..write(obj.totalRevenue);
+      ..write(obj.totalRevenue)
+      ..writeByte(13)
+      ..write(obj.address);
   }
 
   @override

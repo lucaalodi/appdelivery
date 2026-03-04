@@ -44,6 +44,9 @@ class Restaurant extends HiveObject {
   @HiveField(12)
   double totalRevenue;
 
+  @HiveField(13)
+  String address; // NOVO CAMPO
+
   Restaurant({
     required this.id,
     required this.name,
@@ -58,6 +61,7 @@ class Restaurant extends HiveObject {
     required this.deliveryFee,
     required this.ordersCount,
     required this.totalRevenue,
+    this.address = '', // opcional, padrão vazio
   });
 
   bool get isOpen {

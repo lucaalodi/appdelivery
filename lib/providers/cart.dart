@@ -32,6 +32,7 @@ class Cart extends ChangeNotifier {
     String openTime,
     String closeTime,
     double deliveryFee,
+    String address, // NOVO
   ) {
     restaurants.add(
       Restaurant(
@@ -46,17 +47,17 @@ class Cart extends ChangeNotifier {
         deliveryFee: deliveryFee,
         ordersCount: 0,
         totalRevenue: 0,
-        logoUrl: '',
-        bannerUrl: '',
+        logoUrl: logoUrl,
+        bannerUrl: bannerUrl,
+        address: address, // NOVO
       ),
     );
-
+    _saveData();
     notifyListeners();
   }
 
   void addMenuItem(Restaurant restaurant, MenuItem item) {
     final index = restaurants.indexWhere((r) => r.id == restaurant.id);
-
     if (index >= 0) {
       restaurants[index].menu.add(item);
       _saveData();
@@ -66,7 +67,6 @@ class Cart extends ChangeNotifier {
 
   void updateRestaurant(Restaurant restaurant) {
     final index = restaurants.indexWhere((r) => r.id == restaurant.id);
-
     if (index >= 0) {
       restaurants[index] = restaurant;
       _saveData();
@@ -93,10 +93,8 @@ class Cart extends ChangeNotifier {
 
   void _loadData() {
     final data = box.get('restaurants');
-
     if (data != null) {
       restaurants.clear();
-
       for (final r in data) {
         restaurants.add(
           Restaurant(
@@ -112,6 +110,8 @@ class Cart extends ChangeNotifier {
             deliveryFee: (r['deliveryFee'] ?? 0).toDouble(),
             ordersCount: r['ordersCount'] ?? 0,
             totalRevenue: (r['totalRevenue'] ?? 0).toDouble(),
+            address:
+                r['address'] ?? '', // NOVO — padrão vazio para dados antigos
             menu: List<MenuItem>.from(
               (r['menu'] as List).map(
                 (m) => MenuItem(
@@ -128,7 +128,6 @@ class Cart extends ChangeNotifier {
         );
       }
     }
-
     notifyListeners();
   }
 
@@ -147,6 +146,7 @@ class Cart extends ChangeNotifier {
         'totalRevenue': r.totalRevenue,
         'logoUrl': r.logoUrl,
         'bannerUrl': r.bannerUrl,
+        'address': r.address, // NOVO
         'menu': r.menu.map((m) {
           return {
             'id': m.id,
@@ -159,15 +159,12 @@ class Cart extends ChangeNotifier {
         }).toList(),
       };
     }).toList();
-
     box.put('restaurants', data);
   }
 
   /// =======================
   /// TAXA
   /// =======================
-
-  /// retirada no local
   bool isPickup = false;
 
   Map<MenuItem, int> get items => _items;
@@ -190,7 +187,6 @@ class Cart extends ChangeNotifier {
 
   double get totalWithDelivery {
     if (isPickup) return totalAmount;
-
     final fee = selectedRestaurant?.deliveryFee ?? 0;
     return totalAmount + fee;
   }
@@ -201,39 +197,31 @@ class Cart extends ChangeNotifier {
   }
 
   bool addItem(MenuItem item, Restaurant restaurant) {
-    // define restaurante somente se carrinho estiver vazio
     if (_items.isEmpty) {
       selectedRestaurant = restaurant;
     }
-
-    // bloqueia mistura de restaurantes
     if (selectedRestaurant!.id != restaurant.id) {
       return false;
     }
-
     if (_items.containsKey(item)) {
       _items[item] = _items[item]! + 1;
     } else {
       _items[item] = 1;
     }
-
     notifyListeners();
     return true;
   }
 
   void removeItem(MenuItem item) {
     if (!_items.containsKey(item)) return;
-
     if (_items[item]! > 1) {
       _items[item] = _items[item]! - 1;
     } else {
       _items.remove(item);
     }
-
     if (_items.isEmpty) {
       selectedRestaurant = null;
     }
-
     notifyListeners();
   }
 
@@ -242,20 +230,17 @@ class Cart extends ChangeNotifier {
       final item = _items.keys.firstWhere(
         (element) => element.id == menuItemId,
       );
-
       if (_items[item]! > 1) {
         _items[item] = _items[item]! - 1;
       } else {
         _items.remove(item);
       }
-
       if (_items.isEmpty) {
         selectedRestaurant = null;
       }
-
       notifyListeners();
     } catch (e) {
-      // item não encontrado, não faz nada
+      // item não encontrado
     }
   }
 
@@ -267,12 +252,10 @@ class Cart extends ChangeNotifier {
 
   void updateMenuItem(Restaurant restaurant, MenuItem item) {
     final rIndex = restaurants.indexWhere((r) => r.id == restaurant.id);
-
     if (rIndex >= 0) {
       final iIndex = restaurants[rIndex].menu.indexWhere(
         (i) => i.id == item.id,
       );
-
       if (iIndex >= 0) {
         restaurants[rIndex].menu[iIndex] = item;
         _saveData();
@@ -300,48 +283,36 @@ class Cart extends ChangeNotifier {
 
     buffer.writeln('🛒 *Pedido #$orderNum - $time — $restaurantName*');
     buffer.writeln('');
-
     buffer.writeln('📦 *ITENS*');
 
     items.forEach((item, quantity) {
-      // ===== LIMPEZA =====
       String originalName = item.name.trim();
       String baseName = originalName;
       String? sabores;
       String? borda;
 
-      // Remove borda do texto base
       if (baseName.contains('|')) {
         baseName = baseName.split('|').first.trim();
       }
-
-      // Extrai sabores
       if (baseName.contains('(') && baseName.contains(')')) {
         final start = baseName.indexOf('(');
         final end = baseName.indexOf(')');
         sabores = baseName.substring(start + 1, end).trim();
         baseName = baseName.substring(0, start).trim();
       }
-
-      // Extrai borda
       if (originalName.contains('Borda:')) {
         final borderIndex = originalName.indexOf('Borda:');
         borda = originalName.substring(borderIndex + 6).trim();
       }
 
       final total = (item.price * quantity).toStringAsFixed(2);
-
-      // ===== OUTPUT =====
       buffer.writeln('*${baseName.trim()}*');
-
       if (sabores != null && sabores.isNotEmpty) {
         buffer.writeln('   • Sabores: $sabores');
       }
-
       if (borda != null && borda.isNotEmpty) {
         buffer.writeln('   • Borda: $borda');
       }
-
       buffer.writeln('   • Valor: R\$ $total');
       buffer.writeln('');
     });
@@ -352,7 +323,6 @@ class Cart extends ChangeNotifier {
 
     if (!isPickup) {
       final fee = selectedRestaurant?.deliveryFee ?? 0;
-
       buffer.writeln('• Taxa de entrega: R\$ ${fee.toStringAsFixed(2)}');
       buffer.writeln('• Total: R\$ ${totalWithDelivery.toStringAsFixed(2)}');
     } else {
@@ -363,7 +333,6 @@ class Cart extends ChangeNotifier {
     buffer.writeln('');
     buffer.writeln('👤 *CLIENTE*');
     buffer.writeln('• Nome: $customerName');
-
     buffer.writeln('');
     buffer.writeln('📍 *ENTREGA*');
 
@@ -382,11 +351,9 @@ class Cart extends ChangeNotifier {
     if (paymentMethod == 'Pix' && pixKey.isNotEmpty) {
       buffer.writeln('• Chave Pix: $pixKey');
     }
-
     if (paymentMethod == 'Dinheiro' && change.isNotEmpty) {
       buffer.writeln('• Troco para: R\$ $change');
     }
-
     if (notes.isNotEmpty) {
       buffer.writeln('');
       buffer.writeln('📝 *OBSERVAÇÕES*');
