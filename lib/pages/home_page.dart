@@ -88,7 +88,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   List<Widget> _pages(BuildContext context) {
-    return [_buildHome(context), const CartPage()];
+    return [_buildHome(context)];
   }
 
   @override
@@ -96,26 +96,250 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(child: _pages(context)[_currentIndex]),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.white,
-        selectedItemColor: const Color.fromARGB(255, 187, 88, 31),
-        unselectedItemColor: Colors.grey,
-        currentIndex: _currentIndex,
-        onTap: (i) => setState(() => _currentIndex = i),
-        type: BottomNavigationBarType.fixed,
-        iconSize: 24,
-        selectedFontSize: 11,
-        unselectedFontSize: 10,
-        selectedLabelStyle: const TextStyle(height: 1),
-        unselectedLabelStyle: const TextStyle(height: 1),
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Início'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.receipt_long),
-            label: 'Pedidos',
-          ),
-        ],
+      bottomNavigationBar: Consumer<Cart>(
+        builder: (context, cart, _) {
+          // Na aba Pedidos com itens: mostra barra da sacola + nav abaixo
+          if (_currentIndex == 1 && cart.totalItems > 0) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Barra da sacola
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(6, 6, 6, 0),
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const CartPage()),
+                      );
+                    },
+                    child: Container(
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFC0392B),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        children: [
+                          const SizedBox(width: 12),
+                          const Expanded(
+                            child: Text(
+                              "Finalizar pedido",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(right: 12),
+                            child: Text(
+                              "R\$ ${cart.totalAmount.toStringAsFixed(2)}",
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                // Nav bar normal
+                BottomNavigationBar(
+                  backgroundColor: Colors.white,
+                  selectedItemColor: const Color(0xFF962d22),
+                  unselectedItemColor: Colors.grey,
+                  currentIndex: _currentIndex,
+                  onTap: (i) {
+                    if (i == 1) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const CartPage()),
+                      );
+                    } else {
+                      setState(() => _currentIndex = i);
+                    }
+                  },
+                  type: BottomNavigationBarType.fixed,
+                  iconSize: 24,
+                  selectedFontSize: 11,
+                  unselectedFontSize: 10,
+                  selectedLabelStyle: const TextStyle(height: 1),
+                  unselectedLabelStyle: const TextStyle(height: 1),
+                  items: const [
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.home),
+                      label: 'Início',
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.receipt_long),
+                      label: 'Pedidos',
+                    ),
+                  ],
+                ),
+              ],
+            );
+          }
+
+          // Demais casos: nav bar normal
+          return BottomNavigationBar(
+            backgroundColor: Colors.white,
+            selectedItemColor: const Color(0xFF962d22),
+            unselectedItemColor: Colors.grey,
+            currentIndex: _currentIndex,
+            onTap: (i) {
+              if (i == 1) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const CartPage()),
+                );
+              } else {
+                setState(() => _currentIndex = i);
+              }
+            },
+            type: BottomNavigationBarType.fixed,
+            iconSize: 24,
+            selectedFontSize: 11,
+            unselectedFontSize: 10,
+            selectedLabelStyle: const TextStyle(height: 1),
+            unselectedLabelStyle: const TextStyle(height: 1),
+            elevation: 0,
+            items: const [
+              BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Início'),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.receipt_long),
+                label: 'Pedidos',
+              ),
+            ],
+          );
+        },
       ),
+    );
+  }
+
+  Widget _buildTopItems(BuildContext context, dynamic cart) {
+    // Coleta todos os itens com nome do restaurante
+    final allItems = <Map<String, dynamic>>[];
+    for (final r in cart.restaurants) {
+      for (final item in r.menu as List) {
+        if (item.category != 'Sabor' &&
+            item.category != 'Borda' &&
+            item.imageUrl.isNotEmpty) {
+          allItems.add({'item': item, 'restaurantName': r.name as String});
+        }
+      }
+    }
+
+    // Ordena por ordersCount e pega top 10
+    allItems.sort(
+      (a, b) => (b['item'].ordersCount as int).compareTo(
+        a['item'].ordersCount as int,
+      ),
+    );
+    final topItems = allItems.take(10).toList();
+
+    if (topItems.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 4),
+        const Text(
+          'Mais pedidos',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 10),
+        SizedBox(
+          height: 158,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: topItems.length,
+            itemBuilder: (context, index) {
+              final entry = topItems[index];
+              final item = entry['item'];
+              final restaurantName = entry['restaurantName'] as String;
+              return Container(
+                width: 120,
+                margin: EdgeInsets.only(
+                  right: index < topItems.length - 1 ? 10 : 0,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.07),
+                      blurRadius: 6,
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ClipRRect(
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(12),
+                      ),
+                      child: Image.network(
+                        item.imageUrl as String,
+                        height: 90,
+                        width: 120,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(
+                          height: 90,
+                          color: Colors.grey.shade200,
+                          child: const Icon(Icons.fastfood, size: 32),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(7),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            (item.name as String),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'R\$ ${(item.price as double).toStringAsFixed(2)}',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: Color(0xFFC0392B),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            restaurantName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 16),
+      ],
     );
   }
 
@@ -149,7 +373,7 @@ class _HomePageState extends State<HomePage> {
                 // ================= HEADER =================
                 Container(
                   padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
-                  color: const Color.fromARGB(255, 231, 116, 39),
+                  color: const Color(0xFFC0392B),
                   child: Column(
                     children: [
                       GestureDetector(
@@ -261,11 +485,8 @@ class _HomePageState extends State<HomePage> {
                                             ),
                                             border: isSelected
                                                 ? Border.all(
-                                                    color: const Color.fromARGB(
-                                                      255,
-                                                      231,
-                                                      116,
-                                                      39,
+                                                    color: const Color(
+                                                      0xFFC0392B,
                                                     ),
                                                     width: 1.3,
                                                   )
@@ -289,12 +510,7 @@ class _HomePageState extends State<HomePage> {
                                             fontSize: 12,
                                             fontWeight: FontWeight.w500,
                                             color: isSelected
-                                                ? const Color.fromARGB(
-                                                    255,
-                                                    231,
-                                                    116,
-                                                    39,
-                                                  )
+                                                ? const Color(0xFFC0392B)
                                                 : Colors.black87,
                                           ),
                                         ),
@@ -338,12 +554,7 @@ class _HomePageState extends State<HomePage> {
                                     height: 6,
                                     decoration: BoxDecoration(
                                       color: i == page
-                                          ? const Color.fromARGB(
-                                              255,
-                                              231,
-                                              116,
-                                              39,
-                                            )
+                                          ? const Color(0xFFC0392B)
                                           : Colors.grey.shade300,
                                       borderRadius: BorderRadius.circular(3),
                                     ),
@@ -354,6 +565,9 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ],
                       ),
+
+                      // ================= MAIS PEDIDOS =================
+                      _buildTopItems(context, cart),
 
                       // ================= ABERTOS =================
                       if (openRestaurants.isNotEmpty) ...[

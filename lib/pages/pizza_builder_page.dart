@@ -85,6 +85,18 @@ class _PizzaBuilderPageState extends State<PizzaBuilderPage> {
                     ...borders.map((b) {
                       return RadioListTile<MenuItem>(
                         title: Text(b.name),
+                        subtitle: Text(
+                          b.price > 0
+                              ? '+ R\$ ${b.price.toStringAsFixed(2)}'
+                              : 'Grátis',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: b.price > 0
+                                ? const Color(0xFFE77427)
+                                : Colors.green,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                         value: b,
                         groupValue: selectedBorder,
                         onChanged: (v) {

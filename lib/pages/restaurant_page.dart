@@ -227,12 +227,12 @@ class _RestaurantPageState extends State<RestaurantPage> {
                         child: Container(
                           height: 44,
                           decoration: BoxDecoration(
-                            color: const Color(0xFFE77427),
+                            color: const Color(0xFFC0392B),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Row(
                             children: [
-                              const SizedBox(width: 12),
+                              const SizedBox(width: 7),
                               const Expanded(
                                 child: Text(
                                   "Ver minha sacola",
@@ -246,7 +246,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
                               Padding(
                                 padding: const EdgeInsets.only(right: 12),
                                 child: Text(
-                                  "R\$ ${cart.totalWithDelivery.toStringAsFixed(2)}",
+                                  "R\$ ${cart.totalAmount.toStringAsFixed(2)}",
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
@@ -287,7 +287,7 @@ class _RestaurantPageState extends State<RestaurantPage> {
                 ),
               ),
 
-              const SizedBox(width: 10),
+              const SizedBox(width: 7),
 
               Expanded(
                 child: Column(
@@ -304,9 +304,11 @@ class _RestaurantPageState extends State<RestaurantPage> {
                     if (item.description.isNotEmpty)
                       Text(
                         item.description,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: Colors.grey.shade600,
-                          fontSize: 12,
+                          fontSize: 13,
                         ),
                       ),
 
@@ -504,19 +506,19 @@ class _RestaurantHeader extends StatelessWidget {
                       : 'R\$ ${restaurant.deliveryFee.toStringAsFixed(2)}',
                   sublabel: 'Taxa',
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 7),
                 _InfoTileHorizontal(
                   icon: Icons.access_time,
                   label: '${restaurant.openTime} - ${restaurant.closeTime}',
                   sublabel: 'Expediente',
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 7),
                 _InfoTileHorizontal(
                   icon: Icons.star,
                   label: '5.0',
                   sublabel: 'Avaliação',
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 7),
                 _InfoTileIcons(
                   icons: [
                     Icons.credit_card_outlined,

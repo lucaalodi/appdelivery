@@ -5,7 +5,8 @@ import 'package:geolocator/geolocator.dart';
 import '../providers/cart.dart';
 
 class CartPage extends StatefulWidget {
-  const CartPage({super.key});
+  final bool showAppBar;
+  const CartPage({super.key, this.showAppBar = true});
 
   @override
   State<CartPage> createState() => _CartPageState();
@@ -22,7 +23,29 @@ class _CartPageState extends State<CartPage> {
 
   String paymentMethod = 'Dinheiro';
 
-  void next() {
+  void next(Cart cart) {
+    // Validação por step
+    if (step == 1) {
+      if (_nameController.text.trim().isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Informe seu nome"),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+      if (!cart.isPickup && _addressController.text.trim().isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Informe o endereço para entrega"),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+    }
+
     if (step < 2) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
@@ -42,7 +65,6 @@ class _CartPageState extends State<CartPage> {
     }
   }
 
-  // 📍 LOCALIZAÇÃO
   Future<void> getLocation() async {
     bool serviceEnabled;
     LocationPermission permission;
@@ -85,7 +107,21 @@ class _CartPageState extends State<CartPage> {
     final cart = context.watch<Cart>();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Finalizar pedido')),
+      appBar: widget.showAppBar
+          ? AppBar(
+              title: const Text('Finalizar pedido'),
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () {
+                  if (step > 0) {
+                    back();
+                  } else {
+                    Navigator.pop(context);
+                  }
+                },
+              ),
+            )
+          : null,
       body: cart.items.isEmpty
           ? const Center(child: Text('Carrinho vazio'))
           : Column(
@@ -97,7 +133,6 @@ class _CartPageState extends State<CartPage> {
                     context,
                   ).colorScheme.secondary.withOpacity(0.4),
                 ),
-
                 Expanded(
                   child: PageView(
                     controller: _pageController,
@@ -109,14 +144,11 @@ class _CartPageState extends State<CartPage> {
                     ],
                   ),
                 ),
-
-                footer(cart),
+                if (widget.showAppBar) footer(cart),
               ],
             ),
     );
   }
-
-  // ================== STEP 1 ==================
 
   Widget stepCart(Cart cart) {
     return Padding(
@@ -129,13 +161,11 @@ class _CartPageState extends State<CartPage> {
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
-
           Expanded(
             child: ListView(
               children: cart.items.entries.map((e) {
                 final item = e.key;
                 final qty = e.value;
-
                 return Container(
                   margin: const EdgeInsets.only(bottom: 10),
                   padding: const EdgeInsets.all(10),
@@ -148,7 +178,6 @@ class _CartPageState extends State<CartPage> {
                   ),
                   child: Row(
                     children: [
-                      // INFO
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -171,8 +200,6 @@ class _CartPageState extends State<CartPage> {
                           ],
                         ),
                       ),
-
-                      // CONTROLES
                       Container(
                         decoration: BoxDecoration(
                           color: Colors.grey.shade100,
@@ -182,9 +209,7 @@ class _CartPageState extends State<CartPage> {
                           children: [
                             IconButton(
                               icon: const Icon(Icons.remove),
-                              onPressed: () {
-                                cart.removeItem(item);
-                              },
+                              onPressed: () => cart.removeItem(item),
                             ),
                             Text(
                               qty.toString(),
@@ -195,9 +220,8 @@ class _CartPageState extends State<CartPage> {
                             ),
                             IconButton(
                               icon: const Icon(Icons.add),
-                              onPressed: () {
-                                cart.addItem(item, cart.selectedRestaurant!);
-                              },
+                              onPressed: () =>
+                                  cart.addItem(item, cart.selectedRestaurant!),
                             ),
                           ],
                         ),
@@ -208,10 +232,7 @@ class _CartPageState extends State<CartPage> {
               }).toList(),
             ),
           ),
-
           const SizedBox(height: 8),
-
-          // TOTAL
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -237,14 +258,11 @@ class _CartPageState extends State<CartPage> {
     );
   }
 
-  // ================== STEP 2 ==================
-
   Widget stepData(Cart cart) {
     return Padding(
       padding: const EdgeInsets.all(10),
       child: ListView(
         children: [
-          // ===== CLIENTE =====
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
@@ -280,10 +298,7 @@ class _CartPageState extends State<CartPage> {
               ],
             ),
           ),
-
           const SizedBox(height: 8),
-
-          // ===== ENTREGA =====
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -309,9 +324,7 @@ class _CartPageState extends State<CartPage> {
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 8),
-
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
                   title: const Text('Retirar no local'),
@@ -322,19 +335,18 @@ class _CartPageState extends State<CartPage> {
                     if (v) _addressController.clear();
                   },
                 ),
-
                 if (!cart.isPickup) ...[
                   const SizedBox(height: 8),
                   TextField(
                     controller: _addressController,
                     decoration: const InputDecoration(
                       labelText: 'Endereço de entrega',
+                      hintText: 'Rua, bairro, número...',
                       prefixIcon: Icon(Icons.location_on_outlined),
                     ),
                   ),
                   const SizedBox(height: 6),
                   const SizedBox(height: 8),
-
                   Row(
                     children: [
                       Expanded(
@@ -362,9 +374,7 @@ class _CartPageState extends State<CartPage> {
                       ),
                     ],
                   ),
-
                   const SizedBox(height: 8),
-
                   Center(
                     child: ElevatedButton.icon(
                       onPressed: getLocation,
@@ -397,10 +407,7 @@ class _CartPageState extends State<CartPage> {
               ],
             ),
           ),
-
           const SizedBox(height: 14),
-
-          // ===== OBS =====
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
@@ -443,8 +450,6 @@ class _CartPageState extends State<CartPage> {
     );
   }
 
-  // ================== STEP 3 ==================
-
   Widget stepPayment(Cart cart) {
     final deliveryFee = cart.isPickup
         ? 0
@@ -452,7 +457,6 @@ class _CartPageState extends State<CartPage> {
 
     Widget paymentOption({required String title, required IconData icon}) {
       final isSelected = paymentMethod == title;
-
       return GestureDetector(
         onTap: () => setState(() => paymentMethod = title),
         child: AnimatedContainer(
@@ -514,11 +518,9 @@ class _CartPageState extends State<CartPage> {
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
-
           paymentOption(title: 'Dinheiro', icon: Icons.payments),
           paymentOption(title: 'Pix', icon: Icons.qr_code),
           paymentOption(title: 'Cartão', icon: Icons.credit_card),
-
           if (paymentMethod == 'Dinheiro') ...[
             const SizedBox(height: 12),
             TextField(
@@ -533,10 +535,7 @@ class _CartPageState extends State<CartPage> {
               ),
             ),
           ],
-
           const SizedBox(height: 20),
-
-          // RESUMO EM CARD
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -554,14 +553,10 @@ class _CartPageState extends State<CartPage> {
                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 12),
-
                 Text('Subtotal: R\$ ${cart.totalAmount.toStringAsFixed(2)}'),
-
                 if (!cart.isPickup)
                   Text('Entrega: R\$ ${deliveryFee.toStringAsFixed(2)}'),
-
                 const Divider(height: 18),
-
                 Text(
                   'Total: R\$ ${cart.totalWithDelivery.toStringAsFixed(2)}',
                   style: const TextStyle(
@@ -577,8 +572,6 @@ class _CartPageState extends State<CartPage> {
     );
   }
 
-  // ================== FOOTER ==================
-
   Widget footer(Cart cart) {
     return Container(
       padding: const EdgeInsets.all(14),
@@ -592,9 +585,9 @@ class _CartPageState extends State<CartPage> {
             TextButton(
               onPressed: () {
                 if (step == 0) {
-                  Navigator.pop(context); // volta para a Home
+                  Navigator.pop(context);
                 } else {
-                  back(); // volta step anterior
+                  back();
                 }
               },
               child: Text(step == 0 ? 'Início' : 'Voltar'),
@@ -617,7 +610,7 @@ class _CartPageState extends State<CartPage> {
                 if (step == 2) {
                   finishOrder(cart);
                 } else {
-                  next();
+                  next(cart);
                 }
               },
               child: Text(
@@ -631,34 +624,8 @@ class _CartPageState extends State<CartPage> {
     );
   }
 
-  // ================== FINISH ==================
-
   Future<void> finishOrder(Cart cart) async {
-    // ===== VALIDA ENDEREÇO E NOME =====
-
-    if (_nameController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Informe seu nome"),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    if (!cart.isPickup && _addressController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Informe o endereço para entrega"),
-          backgroundColor: Colors.red,
-        ),
-      );
-
-      return;
-    }
-
     final restaurant = cart.selectedRestaurant!;
-
     final message = cart.generateOrderMessage(
       customerName: _nameController.text.isEmpty
           ? 'Não informado'
@@ -668,8 +635,6 @@ class _CartPageState extends State<CartPage> {
       notes: _notesController.text,
       change: _changeController.text,
     );
-
-    // ===== CONFIRMAÇÃO =====
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -682,19 +647,14 @@ class _CartPageState extends State<CartPage> {
           ),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.pop(context, false);
-              },
+              onPressed: () => Navigator.pop(context, false),
               child: const Text("Cancelar"),
             ),
-
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFE77427),
               ),
-              onPressed: () {
-                Navigator.pop(context, true);
-              },
+              onPressed: () => Navigator.pop(context, true),
               child: const Text("Enviar pedido"),
             ),
           ],
@@ -704,14 +664,13 @@ class _CartPageState extends State<CartPage> {
 
     if (confirmed != true) return;
 
-    // ===== ATUALIZA ESTATÍSTICAS =====
-
     restaurant.ordersCount++;
     restaurant.totalRevenue += cart.totalWithDelivery;
 
-    cart.updateRestaurant(restaurant);
+    // Incrementa contador de cada item pedido
+    cart.incrementItemOrders();
 
-    // ===== ENVIA PARA WHATSAPP =====
+    cart.updateRestaurant(restaurant);
 
     await sendOrderToWhatsApp(
       context: context,
@@ -719,19 +678,11 @@ class _CartPageState extends State<CartPage> {
       message: message,
     );
 
-    // ===== LIMPA CARRINHO =====
-
     cart.clear();
-
-    // ===== LIMPA CAMPOS =====
-
     _nameController.clear();
     _addressController.clear();
     _notesController.clear();
     _changeController.clear();
-
-    // ===== VOLTA PARA PRIMEIRA TELA =====
-
     _pageController.jumpToPage(0);
   }
 }

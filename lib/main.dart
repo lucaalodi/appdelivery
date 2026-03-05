@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'providers/cart.dart';
 import 'pages/home_page.dart';
 
@@ -19,14 +20,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const primaryOrange = Color(0xFFFF6B00);
-    const lightOrange = Color(0xFFFFE8D9);
+    const primaryOrange = Color(0xFFC0392B);
+    const lightOrange = Color(0xFFFDECEA);
     const backgroundColor = Color(0xFFF7F7F7);
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
 
-      // 🔥 REMOVE ZOOM GLOBAL DE TEXTO
       builder: (context, child) {
         final mediaQuery = MediaQuery.of(context);
         return MediaQuery(
@@ -39,11 +39,12 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         scaffoldBackgroundColor: backgroundColor,
 
-        // 🔥 COMPACTAÇÃO GLOBAL
+        // 🔥 POPPINS GLOBAL
+        textTheme: GoogleFonts.poppinsTextTheme(),
+
         visualDensity: const VisualDensity(horizontal: -2, vertical: -2),
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
 
-        // ================= COLOR SCHEME =================
         colorScheme: const ColorScheme(
           brightness: Brightness.light,
           primary: primaryOrange,
@@ -56,7 +57,6 @@ class MyApp extends StatelessWidget {
           onSurface: Colors.black87,
         ),
 
-        // ================= APP BAR =================
         appBarTheme: const AppBarTheme(
           backgroundColor: backgroundColor,
           foregroundColor: Colors.black87,
@@ -64,7 +64,6 @@ class MyApp extends StatelessWidget {
           centerTitle: true,
         ),
 
-        // ================= DIALOG =================
         dialogTheme: const DialogThemeData(
           backgroundColor: Colors.white,
           shape: RoundedRectangleBorder(
@@ -72,7 +71,6 @@ class MyApp extends StatelessWidget {
           ),
         ),
 
-        // ================= BUTTON =================
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             backgroundColor: primaryOrange,
@@ -88,7 +86,6 @@ class MyApp extends StatelessWidget {
           style: TextButton.styleFrom(foregroundColor: Colors.grey),
         ),
 
-        // ================= INPUT =================
         inputDecorationTheme: const InputDecorationTheme(
           filled: true,
           fillColor: Colors.white,
@@ -109,11 +106,13 @@ class MyApp extends StatelessWidget {
           labelStyle: TextStyle(color: Colors.black54),
         ),
 
-        // ================= BOTTOM NAV =================
-        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+        bottomNavigationBarTheme: BottomNavigationBarThemeData(
           selectedItemColor: primaryOrange,
           unselectedItemColor: Colors.grey,
           backgroundColor: Colors.white,
+          elevation: 0,
+          selectedLabelStyle: const TextStyle(fontSize: 11, height: 1.2),
+          unselectedLabelStyle: const TextStyle(fontSize: 10, height: 1.2),
         ),
       ),
       home: const HomePage(),

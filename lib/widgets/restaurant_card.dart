@@ -9,64 +9,62 @@ class RestaurantCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
       child: Row(
         children: [
           // LOGO
           Container(
-            width: 56,
-            height: 56,
+            width: 62,
+            height: 62,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(10),
               color: Colors.grey.shade200,
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(10),
               child: restaurant.logoUrl.isNotEmpty
                   ? Image.network(
                       restaurant.logoUrl,
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) =>
-                          const Icon(Icons.store, size: 26),
+                          const Icon(Icons.store, size: 30),
                     )
-                  : const Icon(Icons.store, size: 26),
+                  : const Icon(Icons.store, size: 30),
             ),
           ),
 
-          const SizedBox(width: 10), // 🔥 antes 14
+          const SizedBox(width: 12),
+
           // INFOS
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min, // 🔥 importante
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   restaurant.name,
                   style: const TextStyle(
-                    fontSize: 15, // 🔥 antes 16
+                    fontSize: 15,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
 
-                const SizedBox(height: 2), // 🔥 antes 4
+                const SizedBox(height: 3),
 
                 Text(
                   restaurant.description,
-                  maxLines: 1, // 🔥 antes 2
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontSize: 12, // 🔥 antes 13
-                  ),
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
                 ),
 
-                const SizedBox(height: 3), // 🔥 antes 6
+                const SizedBox(height: 4),
 
                 Row(
                   children: [
                     Icon(
                       Icons.delivery_dining,
-                      size: 14, // 🔥 antes 16
+                      size: 15,
                       color: Colors.grey.shade600,
                     ),
                     const SizedBox(width: 3),
@@ -75,7 +73,7 @@ class RestaurantCard extends StatelessWidget {
                           ? 'Entrega grátis'
                           : 'Taxa R\$ ${restaurant.deliveryFee.toStringAsFixed(2)}',
                       style: TextStyle(
-                        fontSize: 11, // 🔥 antes 12
+                        fontSize: 12,
                         color: Colors.grey.shade700,
                       ),
                     ),
@@ -85,12 +83,9 @@ class RestaurantCard extends StatelessWidget {
             ),
           ),
 
-          // STATUS (menor)
+          // STATUS
           Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 7, // 🔥 antes 8
-              vertical: 3, // 🔥 antes 4
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
               color: restaurant.isOpen ? Colors.green : Colors.red,
               borderRadius: BorderRadius.circular(6),
@@ -99,7 +94,7 @@ class RestaurantCard extends StatelessWidget {
               restaurant.isOpen ? 'Aberto' : 'Fechado',
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 10, // 🔥 antes 11
+                fontSize: 10,
                 fontWeight: FontWeight.bold,
               ),
             ),

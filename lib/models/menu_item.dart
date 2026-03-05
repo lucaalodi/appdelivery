@@ -22,6 +22,9 @@ class MenuItem extends HiveObject {
   @HiveField(5)
   String imageUrl;
 
+  @HiveField(6)
+  int ordersCount;
+
   MenuItem({
     required this.id,
     required this.name,
@@ -29,5 +32,6 @@ class MenuItem extends HiveObject {
     required this.category,
     required this.price,
     required this.imageUrl,
+    this.ordersCount = 0,
   });
 }

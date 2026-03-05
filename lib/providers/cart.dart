@@ -15,11 +15,7 @@ class Cart extends ChangeNotifier {
   final Map<MenuItem, int> _items = {};
   late Box box;
 
-  /// =======================
-  /// RESTAURANTES
-  /// =======================
   final List<Restaurant> restaurants = [];
-
   Restaurant? selectedRestaurant;
 
   void addRestaurant(
@@ -32,7 +28,7 @@ class Cart extends ChangeNotifier {
     String openTime,
     String closeTime,
     double deliveryFee,
-    String address, // NOVO
+    String address,
   ) {
     restaurants.add(
       Restaurant(
@@ -49,7 +45,7 @@ class Cart extends ChangeNotifier {
         totalRevenue: 0,
         logoUrl: logoUrl,
         bannerUrl: bannerUrl,
-        address: address, // NOVO
+        address: address,
       ),
     );
     _saveData();
@@ -110,8 +106,7 @@ class Cart extends ChangeNotifier {
             deliveryFee: (r['deliveryFee'] ?? 0).toDouble(),
             ordersCount: r['ordersCount'] ?? 0,
             totalRevenue: (r['totalRevenue'] ?? 0).toDouble(),
-            address:
-                r['address'] ?? '', // NOVO — padrão vazio para dados antigos
+            address: r['address'] ?? '',
             menu: List<MenuItem>.from(
               (r['menu'] as List).map(
                 (m) => MenuItem(
@@ -119,8 +114,9 @@ class Cart extends ChangeNotifier {
                   name: m['name'],
                   description: m['description'],
                   category: m['category'],
-                  price: m['price'],
+                  price: (m['price'] as num).toDouble(),
                   imageUrl: m['imageUrl'] ?? '',
+                  ordersCount: m['ordersCount'] ?? 0,
                 ),
               ),
             ),
@@ -146,7 +142,7 @@ class Cart extends ChangeNotifier {
         'totalRevenue': r.totalRevenue,
         'logoUrl': r.logoUrl,
         'bannerUrl': r.bannerUrl,
-        'address': r.address, // NOVO
+        'address': r.address,
         'menu': r.menu.map((m) {
           return {
             'id': m.id,
@@ -155,6 +151,7 @@ class Cart extends ChangeNotifier {
             'category': m.category,
             'price': m.price,
             'imageUrl': m.imageUrl,
+            'ordersCount': m.ordersCount,
           };
         }).toList(),
       };
@@ -162,9 +159,24 @@ class Cart extends ChangeNotifier {
     box.put('restaurants', data);
   }
 
-  /// =======================
-  /// TAXA
-  /// =======================
+  void incrementItemOrders() {
+    if (selectedRestaurant == null) return;
+    final rIndex = restaurants.indexWhere(
+      (r) => r.id == selectedRestaurant!.id,
+    );
+    if (rIndex < 0) return;
+    _items.forEach((cartItem, qty) {
+      final mIndex = restaurants[rIndex].menu.indexWhere(
+        (m) => m.id == cartItem.id,
+      );
+      if (mIndex >= 0) {
+        restaurants[rIndex].menu[mIndex].ordersCount += qty;
+      }
+    });
+    _saveData();
+    notifyListeners();
+  }
+
   bool isPickup = false;
 
   Map<MenuItem, int> get items => _items;
@@ -197,12 +209,8 @@ class Cart extends ChangeNotifier {
   }
 
   bool addItem(MenuItem item, Restaurant restaurant) {
-    if (_items.isEmpty) {
-      selectedRestaurant = restaurant;
-    }
-    if (selectedRestaurant!.id != restaurant.id) {
-      return false;
-    }
+    if (_items.isEmpty) selectedRestaurant = restaurant;
+    if (selectedRestaurant!.id != restaurant.id) return false;
     if (_items.containsKey(item)) {
       _items[item] = _items[item]! + 1;
     } else {
@@ -219,9 +227,7 @@ class Cart extends ChangeNotifier {
     } else {
       _items.remove(item);
     }
-    if (_items.isEmpty) {
-      selectedRestaurant = null;
-    }
+    if (_items.isEmpty) selectedRestaurant = null;
     notifyListeners();
   }
 
@@ -235,13 +241,9 @@ class Cart extends ChangeNotifier {
       } else {
         _items.remove(item);
       }
-      if (_items.isEmpty) {
-        selectedRestaurant = null;
-      }
+      if (_items.isEmpty) selectedRestaurant = null;
       notifyListeners();
-    } catch (e) {
-      // item não encontrado
-    }
+    } catch (e) {}
   }
 
   void clear() {
@@ -264,9 +266,6 @@ class Cart extends ChangeNotifier {
     }
   }
 
-  /// =======================
-  /// WHATSAPP MESSAGE
-  /// =======================
   String generateOrderMessage({
     required String customerName,
     required String paymentMethod,
@@ -281,7 +280,8 @@ class Cart extends ChangeNotifier {
     final restaurantName = selectedRestaurant?.name ?? 'Restaurante';
     final pixKey = selectedRestaurant?.pixKey ?? '';
 
-    buffer.writeln('🛒 *Pedido #$orderNum - $time — $restaurantName*');
+    // Cabeçalho — restaurante em negrito, sem hífen entre #num e hora
+    buffer.writeln('🛒 *Pedido #$orderNum* | $time | *$restaurantName*');
     buffer.writeln('');
     buffer.writeln('📦 *ITENS*');
 
@@ -291,9 +291,7 @@ class Cart extends ChangeNotifier {
       String? sabores;
       String? borda;
 
-      if (baseName.contains('|')) {
-        baseName = baseName.split('|').first.trim();
-      }
+      if (baseName.contains('|')) baseName = baseName.split('|').first.trim();
       if (baseName.contains('(') && baseName.contains(')')) {
         final start = baseName.indexOf('(');
         final end = baseName.indexOf(')');
@@ -307,12 +305,10 @@ class Cart extends ChangeNotifier {
 
       final total = (item.price * quantity).toStringAsFixed(2);
       buffer.writeln('*${baseName.trim()}*');
-      if (sabores != null && sabores.isNotEmpty) {
+      if (sabores != null && sabores.isNotEmpty)
         buffer.writeln('   • Sabores: $sabores');
-      }
-      if (borda != null && borda.isNotEmpty) {
+      if (borda != null && borda.isNotEmpty)
         buffer.writeln('   • Borda: $borda');
-      }
       buffer.writeln('   • Valor: R\$ $total');
       buffer.writeln('');
     });
@@ -323,7 +319,7 @@ class Cart extends ChangeNotifier {
 
     if (!isPickup) {
       final fee = selectedRestaurant?.deliveryFee ?? 0;
-      buffer.writeln('• Taxa de entrega: R\$ ${fee.toStringAsFixed(2)}');
+      buffer.writeln('• Taxa de entrega: R\$ *${fee.toStringAsFixed(2)}*');
       buffer.writeln('• Total: R\$ ${totalWithDelivery.toStringAsFixed(2)}');
     } else {
       buffer.writeln('• Retirada no local');
@@ -348,12 +344,11 @@ class Cart extends ChangeNotifier {
     buffer.writeln('💳 *PAGAMENTO*');
     buffer.writeln('• Pagamento: $paymentMethod');
 
-    if (paymentMethod == 'Pix' && pixKey.isNotEmpty) {
+    if (paymentMethod == 'Pix' && pixKey.isNotEmpty)
       buffer.writeln('• Chave Pix: $pixKey');
-    }
-    if (paymentMethod == 'Dinheiro' && change.isNotEmpty) {
+    if (paymentMethod == 'Dinheiro' && change.isNotEmpty)
       buffer.writeln('• Troco para: R\$ $change');
-    }
+
     if (notes.isNotEmpty) {
       buffer.writeln('');
       buffer.writeln('📝 *OBSERVAÇÕES*');
