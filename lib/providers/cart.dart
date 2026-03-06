@@ -29,6 +29,7 @@ class Cart extends ChangeNotifier {
     String closeTime,
     double deliveryFee,
     String address,
+    List<int> openDays,
   ) {
     restaurants.add(
       Restaurant(
@@ -46,6 +47,8 @@ class Cart extends ChangeNotifier {
         logoUrl: logoUrl,
         bannerUrl: bannerUrl,
         address: address,
+        openDays: openDays,
+        createdAt: DateTime.now(),
       ),
     );
     _saveData();
@@ -107,6 +110,12 @@ class Cart extends ChangeNotifier {
             ordersCount: r['ordersCount'] ?? 0,
             totalRevenue: (r['totalRevenue'] ?? 0).toDouble(),
             address: r['address'] ?? '',
+            openDays: r['openDays'] != null
+                ? List<int>.from(r['openDays'])
+                : [1, 2, 3, 4, 5, 6, 7],
+            createdAt: r['createdAt'] != null
+                ? DateTime.parse(r['createdAt'])
+                : null,
             menu: List<MenuItem>.from(
               (r['menu'] as List).map(
                 (m) => MenuItem(
@@ -143,6 +152,8 @@ class Cart extends ChangeNotifier {
         'logoUrl': r.logoUrl,
         'bannerUrl': r.bannerUrl,
         'address': r.address,
+        'openDays': r.openDays,
+        'createdAt': r.createdAt?.toIso8601String(),
         'menu': r.menu.map((m) {
           return {
             'id': m.id,
@@ -249,6 +260,18 @@ class Cart extends ChangeNotifier {
   void clear() {
     _items.clear();
     selectedRestaurant = null;
+    notifyListeners();
+  }
+
+  void resetRestaurantStats(String restaurantId) {
+    final index = restaurants.indexWhere((r) => r.id == restaurantId);
+    if (index < 0) return;
+    restaurants[index].ordersCount = 0;
+    restaurants[index].totalRevenue = 0;
+    for (final item in restaurants[index].menu) {
+      item.ordersCount = 0;
+    }
+    _saveData();
     notifyListeners();
   }
 

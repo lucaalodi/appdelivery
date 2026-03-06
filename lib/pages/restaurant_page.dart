@@ -410,7 +410,7 @@ class _RestaurantHeader extends StatelessWidget {
           ),
 
           // ── AVALIAÇÃO — centralizada com a logo ─────────────────
-          Positioned(
+          const Positioned(
             top: _bannerHeight - 40 + _logoSize + 6,
             right: 16,
             width: _logoSize,
@@ -464,9 +464,9 @@ class _RestaurantHeader extends StatelessWidget {
             left: 16,
             child: GestureDetector(
               onTap: () => _showInfosDialog(context, restaurant),
-              child: Row(
+              child: const Row(
                 mainAxisSize: MainAxisSize.min,
-                children: const [
+                children: [
                   Icon(Icons.info_outline, size: 14, color: Colors.grey),
                   SizedBox(width: 4),
                   Text(
@@ -513,13 +513,13 @@ class _RestaurantHeader extends StatelessWidget {
                   sublabel: 'Expediente',
                 ),
                 const SizedBox(width: 7),
-                _InfoTileHorizontal(
+                const _InfoTileHorizontal(
                   icon: Icons.star,
                   label: '5.0',
                   sublabel: 'Avaliação',
                 ),
                 const SizedBox(width: 7),
-                _InfoTileIcons(
+                const _InfoTileIcons(
                   icons: [
                     Icons.credit_card_outlined,
                     Icons.pix,

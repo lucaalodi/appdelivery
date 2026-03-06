@@ -4,6 +4,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'providers/cart.dart';
 import 'pages/home_page.dart';
+import 'services/time_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -11,6 +12,9 @@ Future<void> main() async {
 
   final cart = Cart();
   await cart.init();
+
+  // Busca horário real do servidor (não bloqueia se offline)
+  await TimeService.fetchServerTime();
 
   runApp(ChangeNotifierProvider(create: (_) => cart, child: const MyApp()));
 }
@@ -39,7 +43,6 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         scaffoldBackgroundColor: backgroundColor,
 
-        // 🔥 POPPINS GLOBAL
         textTheme: GoogleFonts.poppinsTextTheme(),
 
         visualDensity: const VisualDensity(horizontal: -2, vertical: -2),
@@ -106,13 +109,13 @@ class MyApp extends StatelessWidget {
           labelStyle: TextStyle(color: Colors.black54),
         ),
 
-        bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
           selectedItemColor: primaryOrange,
           unselectedItemColor: Colors.grey,
           backgroundColor: Colors.white,
           elevation: 0,
-          selectedLabelStyle: const TextStyle(fontSize: 11, height: 1.2),
-          unselectedLabelStyle: const TextStyle(fontSize: 10, height: 1.2),
+          selectedLabelStyle: TextStyle(fontSize: 11, height: 1.2),
+          unselectedLabelStyle: TextStyle(fontSize: 10, height: 1.2),
         ),
       ),
       home: const HomePage(),

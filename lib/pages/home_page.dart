@@ -359,8 +359,21 @@ class _HomePageState extends State<HomePage> {
       return matchesCategory && matchesSearch;
     }).toList();
 
-    final openRestaurants = restaurants.where((r) => r.isOpen).toList();
-    final closedRestaurants = restaurants.where((r) => !r.isOpen).toList();
+    // Ordena abertos: novos (0 pedidos) logo após o 1º, resto por pedidos
+    final openList = restaurants.where((r) => r.isOpen).toList();
+    final newOnes = openList.where((r) => r.isNew).toList();
+    final veterans = openList.where((r) => !r.isNew).toList()
+      ..sort((a, b) => b.ordersCount.compareTo(a.ordersCount));
+
+    final openRestaurants = [
+      if (veterans.isNotEmpty) veterans.first,
+      ...newOnes,
+      if (veterans.length > 1) ...veterans.sublist(1),
+    ];
+
+    // Fechados também por pedidos
+    final closedRestaurants = restaurants.where((r) => !r.isOpen).toList()
+      ..sort((a, b) => b.ordersCount.compareTo(a.ordersCount));
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
@@ -596,7 +609,36 @@ class _HomePageState extends State<HomePage> {
                                     ),
                                   );
                                 },
-                                child: RestaurantCard(restaurant: restaurant),
+                                child: Stack(
+                                  children: [
+                                    RestaurantCard(restaurant: restaurant),
+                                    if (restaurant.isNew)
+                                      Positioned(
+                                        top: 10,
+                                        right: 10,
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 3,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFFC0392B),
+                                            borderRadius: BorderRadius.circular(
+                                              20,
+                                            ),
+                                          ),
+                                          child: const Text(
+                                            'Novo',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
                               ),
                               Divider(
                                 height: 1,
